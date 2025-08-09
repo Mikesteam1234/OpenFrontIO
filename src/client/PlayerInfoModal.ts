@@ -142,7 +142,14 @@ export class PlayerInfoModal extends LitElement {
   @state() private expandedGameId: string | null = null;
 
   private viewGame(gameId: string): void {
-    console.log("Viewing game:", gameId); //openfront.io/game/#join={gameID}}
+    this.close();
+    const path = location.pathname;
+    const search = location.search;
+    const hash = `#join=${encodeURIComponent(gameId)}`;
+    const newUrl = `${path}${search}${hash}`;
+
+    history.pushState({ join: gameId }, "", newUrl);
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
   }
 
   private toggleGameDetails(gameId: string): void {
