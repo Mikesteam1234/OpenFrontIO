@@ -33,11 +33,7 @@ export class PlayerInfoModal extends LitElement {
     close: () => void;
   };
 
-  @state() private playerName: string = "";
-  @state() private discordName: string = "";
-  @state() private playerAvatarUrl: string = "";
-  @state() private flag: string = "";
-  @state() private publicId: string = "";
+  @state() private userMeResponse: UserMeResponse | null = null;
 
   @state() private wins: number = 57;
   @state() private playTimeSeconds: number = 5 * 3600 + 33 * 60;
@@ -359,34 +355,41 @@ export class PlayerInfoModal extends LitElement {
   }
 
   render() {
-    this.flag = this.getStoredFlag();
-    this.playerName = this.getStoredName();
+    const flag = this.getStoredFlag();
+    const playerName = this.getStoredName();
+
+    const u = this.userMeResponse?.user;
+    const discordName = u?.username ?? "";
+    const avatarUrl = u?.avatar
+      ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.${u.avatar.startsWith("a_") ? "gif" : "png"}`
+      : u?.discriminator !== undefined
+        ? `https://cdn.discordapp.com/embed/avatars/${Number(u.discriminator) % 5}.png`
+        : "";
     return html`
       <o-modal id="playerInfoModal" title="Player Info" alwaysMaximized>
         <div class="flex flex-col items-center mt-2 mb-4">
           <br />
           <div class="flex items-center gap-2">
-            <!-- Flag -->
             <div class="p-[3px] rounded-full bg-gray-500">
               <img
                 class="size-[48px] rounded-full block"
-                src="/flags/${this.flag ?? "xx"}.svg"
+                src="/flags/${flag ?? "xx"}.svg"
                 alt="Flag"
               />
             </div>
 
             <!-- Names -->
-            <span class="font-semibold">${this.playerName}</span>
+            <span class="font-semibold">${playerName}</span>
             <span>|</span>
-            <span class="font-semibold">${this.discordName}</span>
+            <span class="font-semibold">${discordName}</span>
 
             <!-- Avatar -->
-            ${this.playerAvatarUrl
+            ${avatarUrl
               ? html`
                   <div class="p-[3px] rounded-full bg-gray-500">
                     <img
                       class="size-[48px] rounded-full block"
-                      src="${this.playerAvatarUrl}"
+                      src="${avatarUrl}"
                       alt="Avatar"
                     />
                   </div>
@@ -683,26 +686,16 @@ export class PlayerInfoModal extends LitElement {
   }
 
   onUserMe(userMeResponse: UserMeResponse) {
-    const { user, player } = userMeResponse;
-    const { id, avatar, username, discriminator } = user;
-
-    this.discordName = username;
-    this.playerAvatarUrl = avatar
-      ? `https://cdn.discordapp.com/avatars/${id}/${avatar}.${avatar.startsWith("a_") ? "gif" : "png"}`
-      : `https://cdn.discordapp.com/embed/avatars/${Number(discriminator) % 5}.png`;
-
-    if (player.publicId) {
-      this.publicId = player.publicId;
+    this.userMeResponse = userMeResponse;
+    const playerId = userMeResponse?.player?.publicId;
+    if (playerId) {
+      this.loadFromApi(playerId);
     }
-
-    this.loadFromApi(this.publicId);
-
     this.requestUpdate();
   }
 
   onLoggedOut() {
-    this.playerName = "";
-    this.playerAvatarUrl = "";
+    this.userMeResponse = null;
   }
 
   private async loadFromApi(playerId: string): Promise<void> {
