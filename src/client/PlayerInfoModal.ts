@@ -4,6 +4,19 @@ import { UserMeResponse } from "../core/ApiSchemas";
 import { PlayerStats, PlayerStatsSchema } from "../core/StatsSchemas";
 import { getServerConfigFromClient } from "../core/configuration/ConfigLoader";
 
+// for test
+type PlayerApiResponse = {
+  stats?: unknown;
+  games?: Array<{
+    gameId: string;
+    start: string;
+    map: string;
+    difficulty: string;
+    type: string;
+    mode?: string;
+  }>;
+};
+
 @customElement("player-info-modal")
 export class PlayerInfoModal extends LitElement {
   @query("o-modal") private modalEl!: HTMLElement & {
@@ -583,14 +596,14 @@ export class PlayerInfoModal extends LitElement {
         console.error("API error:", res.status, res.statusText);
         return;
       }
-      const data = await res.json();
+      const data = (await res.json()) as PlayerApiResponse;
 
       if (data?.stats) {
         this.applyBackendStats(data.stats);
       }
 
       if (Array.isArray(data?.games)) {
-        this.recentGames = data.games.map((g: any) => ({
+        this.recentGames = data.games.map((g) => ({
           gameId: g.gameId,
           start: g.start,
           map: g.map,
