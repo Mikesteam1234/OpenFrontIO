@@ -1,30 +1,8 @@
 import { html, LitElement } from "lit";
 import { customElement, query, state } from "lit/decorators.js";
 import { UserMeResponse } from "../core/ApiSchemas";
+import { PlayerStats, PlayerStatsSchema } from "../core/StatsSchemas";
 import { getServerConfigFromClient } from "../core/configuration/ConfigLoader";
-
-type BuildingStat = {
-  built: number;
-  destroyed: number;
-  lost: number;
-  captured: number;
-};
-type ShipStat = { sent: number; destroyed: number; arrived: number };
-type NukeStat = { built: number; destroyed: number; hits: number };
-
-type AllBuildingStats = {
-  city: BuildingStat;
-  port: BuildingStat;
-  defense: BuildingStat;
-  sam: BuildingStat;
-  silo: BuildingStat;
-  warship: ShipStat;
-  transportShip: ShipStat;
-  tradeShip: ShipStat;
-  atom: NukeStat;
-  hydrogen: NukeStat;
-  mirv: NukeStat;
-};
 
 @customElement("player-info-modal")
 export class PlayerInfoModal extends LitElement {
@@ -37,50 +15,13 @@ export class PlayerInfoModal extends LitElement {
 
   @state() private wins: number = 57;
   @state() private playTimeSeconds: number = 5 * 3600 + 33 * 60;
-  @state() private progressPercent: number = 62;
   @state() private gamesPlayed: number = 119;
   @state() private losses: number = 62;
   @state() private lastActive: string = "1992/4/27";
 
-  @state() private buildingStatsPublic: AllBuildingStats = {
-    city: { built: 0, destroyed: 0, lost: 0, captured: 0 },
-    port: { built: 0, destroyed: 0, lost: 0, captured: 0 },
-    defense: { built: 0, destroyed: 0, lost: 0, captured: 0 },
-    sam: { built: 0, destroyed: 0, lost: 0, captured: 0 },
-    silo: { built: 0, destroyed: 0, lost: 0, captured: 0 },
-    warship: { sent: 0, destroyed: 0, arrived: 0 },
-    transportShip: { sent: 0, destroyed: 0, arrived: 0 },
-    tradeShip: { sent: 0, destroyed: 0, arrived: 0 },
-    atom: { built: 0, destroyed: 0, hits: 0 },
-    hydrogen: { built: 0, destroyed: 0, hits: 0 },
-    mirv: { built: 0, destroyed: 0, hits: 0 },
-  };
-  @state() private buildingStatsPrivate: AllBuildingStats = {
-    city: { built: 0, destroyed: 0, lost: 0, captured: 0 },
-    port: { built: 0, destroyed: 0, lost: 0, captured: 0 },
-    defense: { built: 0, destroyed: 0, lost: 0, captured: 0 },
-    sam: { built: 0, destroyed: 0, lost: 0, captured: 0 },
-    silo: { built: 0, destroyed: 0, lost: 0, captured: 0 },
-    warship: { sent: 0, destroyed: 0, arrived: 0 },
-    transportShip: { sent: 0, destroyed: 0, arrived: 0 },
-    tradeShip: { sent: 0, destroyed: 0, arrived: 0 },
-    atom: { built: 0, destroyed: 0, hits: 0 },
-    hydrogen: { built: 0, destroyed: 0, hits: 0 },
-    mirv: { built: 0, destroyed: 0, hits: 0 },
-  };
-  @state() private buildingStatsAll: AllBuildingStats = {
-    city: { built: 0, destroyed: 0, lost: 0, captured: 0 },
-    port: { built: 0, destroyed: 0, lost: 0, captured: 0 },
-    defense: { built: 0, destroyed: 0, lost: 0, captured: 0 },
-    sam: { built: 0, destroyed: 0, lost: 0, captured: 0 },
-    silo: { built: 0, destroyed: 0, lost: 0, captured: 0 },
-    warship: { sent: 0, destroyed: 0, arrived: 0 },
-    transportShip: { sent: 0, destroyed: 0, arrived: 0 },
-    tradeShip: { sent: 0, destroyed: 0, arrived: 0 },
-    atom: { built: 0, destroyed: 0, hits: 0 },
-    hydrogen: { built: 0, destroyed: 0, hits: 0 },
-    mirv: { built: 0, destroyed: 0, hits: 0 },
-  };
+  @state() private statsPublic: PlayerStats | null = null;
+  @state() private statsPrivate: PlayerStats | null = null;
+  @state() private statsAll: PlayerStats | null = null;
   @state() private visibility: "all" | "public" | "private" = "all";
   @state() private totalsByVisibility: Record<
     "all" | "public" | "private",
@@ -186,7 +127,7 @@ export class PlayerInfoModal extends LitElement {
       transportShip: "Transport Ship",
       tradeShip: "Trade Ship",
     };
-    return buildingNames[building] || building;
+    return buildingNames[building] ?? building;
   }
 
   connectedCallback() {
@@ -197,14 +138,14 @@ export class PlayerInfoModal extends LitElement {
     super.disconnectedCallback();
   }
 
-  private getDisplayedBuildingStats(): AllBuildingStats {
+  private getDisplayedStats(): PlayerStats | null {
     switch (this.visibility) {
       case "public":
-        return this.buildingStatsPublic;
+        return this.statsPublic;
       case "private":
-        return this.buildingStatsPrivate;
+        return this.statsPrivate;
       default:
-        return this.buildingStatsAll;
+        return this.statsAll;
     }
   }
   private setVisibility(v: "all" | "public" | "private") {
@@ -217,141 +158,64 @@ export class PlayerInfoModal extends LitElement {
   }
 
   private applyBackendStats(rawStats: any): void {
+    const pubStats = PlayerStatsSchema.safeParse(
+      rawStats?.Public?.["Free For All"]?.Medium?.stats ?? {},
+    );
+    const prvStats = PlayerStatsSchema.safeParse(
+      rawStats?.Private?.["Free For All"]?.Medium?.stats ?? {},
+    );
+    this.statsPublic = pubStats.success ? pubStats.data : null;
+    this.statsPrivate = prvStats.success ? prvStats.data : null;
+    if (this.statsPublic && this.statsPrivate) {
+      this.statsAll = this.mergePlayerStats(
+        this.statsPublic,
+        this.statsPrivate,
+      );
+    } else {
+      this.statsAll = this.statsPublic ?? this.statsPrivate;
+    }
     const pub = rawStats?.Public?.["Free For All"]?.Medium;
     const prv = rawStats?.Private?.["Free For All"]?.Medium;
-
-    const add4 = (dst: number[], src: string[] = ["0", "0", "0", "0"]) => {
-      for (let i = 0; i < 4; i++) dst[i] = (dst[i] ?? 0) + Number(src[i] ?? 0);
-    };
-    const add3 = (dst: number[], src: string[] = ["0", "0", "0"]) => {
-      for (let i = 0; i < 3; i++) dst[i] = (dst[i] ?? 0) + Number(src[i] ?? 0);
-    };
-    const toShip3 = (arr: string[] = ["0", "0", "0", "0"]) =>
-      arr.slice(0, 3) as string[];
-
-    const aggregateFromBranch = (br: any) => {
-      const units: Record<string, number[]> = {};
-      const boats: Record<string, number[]> = {};
-      const bombs: Record<string, number[]> = {};
-      let wins = 0,
-        losses = 0,
-        total = 0;
-
-      if (br) {
-        wins += Number(br.wins ?? 0);
-        losses += Number(br.losses ?? 0);
-        total += Number(br.total ?? 0);
-
-        Object.entries(br.stats?.units ?? {}).forEach(([k, arr]) => {
-          if (!units[k]) units[k] = [0, 0, 0, 0];
-          add4(units[k], arr as string[]);
-        });
-        Object.entries(br.stats?.boats ?? {}).forEach(([k, arr]) => {
-          if (!boats[k]) boats[k] = [0, 0, 0];
-          add3(boats[k], toShip3(arr as string[]));
-        });
-        Object.entries(br.stats?.bombs ?? {}).forEach(([k, arr]) => {
-          if (!bombs[k]) bombs[k] = [0, 0, 0];
-          add3(bombs[k], arr as string[]);
-        });
-      }
-      return { units, boats, bombs, wins, losses, total };
-    };
-
-    const pubAgg = aggregateFromBranch(pub);
-    const prvAgg = aggregateFromBranch(prv);
-
-    const sumAgg = (a: any, b: any) => {
-      const outUnits: Record<string, number[]> = {};
-      const outBoats: Record<string, number[]> = {};
-      const outBombs: Record<string, number[]> = {};
-      const keys = new Set([...Object.keys(a.units), ...Object.keys(b.units)]);
-      keys.forEach((k) => {
-        outUnits[k] = [0, 0, 0, 0];
-        add4(outUnits[k], a.units[k] as any);
-        add4(outUnits[k], b.units[k] as any);
-      });
-      const keysB = new Set([...Object.keys(a.boats), ...Object.keys(b.boats)]);
-      keysB.forEach((k) => {
-        outBoats[k] = [0, 0, 0];
-        add3(outBoats[k], a.boats[k] as any);
-        add3(outBoats[k], b.boats[k] as any);
-      });
-      const keysC = new Set([...Object.keys(a.bombs), ...Object.keys(b.bombs)]);
-      keysC.forEach((k) => {
-        outBombs[k] = [0, 0, 0];
-        add3(outBombs[k], a.bombs[k] as any);
-        add3(outBombs[k], b.bombs[k] as any);
-      });
-      return {
-        units: outUnits,
-        boats: outBoats,
-        bombs: outBombs,
-        wins: a.wins + b.wins,
-        losses: a.losses + b.losses,
-        total: a.total + b.total,
-      };
-    };
-
-    const allAgg = sumAgg(pubAgg, prvAgg);
-
-    const shapeFromAgg = (agg: any): AllBuildingStats => {
-      const get4 = (k: string) =>
-        (agg.units[k] ?? [0, 0, 0, 0]) as [number, number, number, number];
-      const get3 = (k: string) =>
-        (agg.bombs[k] ?? [0, 0, 0]) as [number, number, number];
-      const getShip = (k: string) =>
-        (agg.boats[k] ?? [0, 0, 0]) as [number, number, number];
-
-      const [cityB, cityD, cityL, cityC] = get4("city");
-      const [defB, defD, defL, defC] = get4("defp");
-      const [portB, portD, portL, portC] = get4("port");
-      const [samB, samD, samL, samC] = get4("saml");
-      const [siloB, siloD, siloL, siloC] = get4("silo");
-
-      const [atomB, atomD, atomH] = get3("abomb");
-      const [hydB, hydD, hydH] = get3("hbomb");
-      const [mirvB, mirvD, mirvH] = get3("mirv");
-
-      const [transS, transD, transA] = getShip("trans");
-      const [tradeS, tradeD, tradeA] = getShip("trade");
-      const [warS, warD, warA] = getShip("wshp");
-
-      return {
-        city: { built: cityB, destroyed: cityD, captured: cityC, lost: cityL },
-        port: { built: portB, destroyed: portD, captured: portC, lost: portL },
-        defense: { built: defB, destroyed: defD, captured: defC, lost: defL },
-        sam: { built: samB, destroyed: samD, captured: samC, lost: samL },
-        silo: { built: siloB, destroyed: siloD, captured: siloC, lost: siloL },
-        warship: { sent: warS, destroyed: warD, arrived: warA },
-        transportShip: { sent: transS, destroyed: transD, arrived: transA },
-        tradeShip: { sent: tradeS, destroyed: tradeD, arrived: tradeA },
-        atom: { built: atomB, destroyed: atomD, hits: atomH },
-        hydrogen: { built: hydB, destroyed: hydD, hits: hydH },
-        mirv: { built: mirvB, destroyed: mirvD, hits: mirvH },
-      };
-    };
-
-    this.buildingStatsPublic = shapeFromAgg(pubAgg);
-    this.buildingStatsPrivate = shapeFromAgg(prvAgg);
-    this.buildingStatsAll = shapeFromAgg(allAgg);
-
+    const allWins = Number(pub?.wins ?? 0) + Number(prv?.wins ?? 0);
+    const allLosses = Number(pub?.losses ?? 0) + Number(prv?.losses ?? 0);
+    const allTotal = Number(pub?.total ?? 0) + Number(prv?.total ?? 0);
     this.totalsByVisibility = {
-      all: { wins: allAgg.wins, losses: allAgg.losses, total: allAgg.total },
-      public: { wins: pubAgg.wins, losses: pubAgg.losses, total: pubAgg.total },
+      all: { wins: allWins, losses: allLosses, total: allTotal },
+      public: {
+        wins: Number(pub?.wins ?? 0),
+        losses: Number(pub?.losses ?? 0),
+        total: Number(pub?.total ?? 0),
+      },
       private: {
-        wins: prvAgg.wins,
-        losses: prvAgg.losses,
-        total: prvAgg.total,
+        wins: Number(prv?.wins ?? 0),
+        losses: Number(prv?.losses ?? 0),
+        total: Number(prv?.total ?? 0),
       },
     };
-
     const t = this.totalsByVisibility[this.visibility];
     this.wins = t.wins;
     this.losses = t.losses;
     this.gamesPlayed = t.total;
-
     this.requestUpdate();
+  }
+
+  private mergePlayerStats(a: PlayerStats, b: PlayerStats): PlayerStats {
+    const safeA = a ?? {};
+    const safeB = b ?? {};
+    const mergeArrays = (arr1?: any[], arr2?: any[]) => {
+      if (!arr1 && !arr2) return undefined;
+      if (!arr1) return arr2;
+      if (!arr2) return arr1;
+      return arr1.map((v, i) => Number(v ?? 0) + Number(arr2[i] ?? 0));
+    };
+    return {
+      attacks: mergeArrays(safeA.attacks, safeB.attacks),
+      betrayals: (safeA.betrayals ?? 0n) + (safeB.betrayals ?? 0n),
+      boats: { ...(safeA.boats ?? {}), ...(safeB.boats ?? {}) },
+      bombs: { ...(safeA.bombs ?? {}), ...(safeB.bombs ?? {}) },
+      gold: mergeArrays(safeA.gold, safeB.gold),
+      units: { ...(safeA.units ?? {}), ...(safeB.units ?? {}) },
+    };
   }
 
   render() {
@@ -486,24 +350,23 @@ export class PlayerInfoModal extends LitElement {
               </thead>
               <tbody>
                 ${(() => {
-                  const bs = this.getDisplayedBuildingStats();
-                  return Object.entries(bs)
-                    .filter(([b]) =>
-                      ["city", "port", "defense", "sam", "silo"].includes(b),
+                  const stats = this.getDisplayedStats();
+                  if (!stats || !stats.units) return null;
+                  // units: { city: [built, destroyed, captured, lost], ... }
+                  return Object.entries(stats.units)
+                    .filter(([unit]) =>
+                      ["city", "port", "defp", "saml", "silo"].includes(unit),
                     )
-                    .map(([building, stats]) => {
-                      const typedStats = stats as BuildingStat;
+                    .map(([unit, arr]) => {
+                      const [built, destroyed, captured, lost] =
+                        arr.map(Number);
                       return html`
                         <tr>
-                          <td>${this.getBuildingName(building)}</td>
-                          <td class="text-center">${typedStats.built ?? 0}</td>
-                          <td class="text-center">
-                            ${typedStats.destroyed ?? 0}
-                          </td>
-                          <td class="text-center">
-                            ${typedStats.captured ?? 0}
-                          </td>
-                          <td class="text-center">${typedStats.lost ?? 0}</td>
+                          <td>${this.getBuildingName(unit)}</td>
+                          <td class="text-center">${built ?? 0}</td>
+                          <td class="text-center">${destroyed ?? 0}</td>
+                          <td class="text-center">${captured ?? 0}</td>
+                          <td class="text-center">${lost ?? 0}</td>
                         </tr>
                       `;
                     });
@@ -526,18 +389,27 @@ export class PlayerInfoModal extends LitElement {
                 </tr>
               </thead>
               <tbody>
-                ${["transportShip", "tradeShip", "warship"].map((ship) => {
-                  const bs = this.getDisplayedBuildingStats();
-                  const stats = bs[ship] as ShipStat;
-                  return html`
-                    <tr>
-                      <td>${this.getBuildingName(ship)}</td>
-                      <td class="text-center">${stats.sent ?? 0}</td>
-                      <td class="text-center">${stats.destroyed ?? 0}</td>
-                      <td class="text-center">${stats.arrived ?? 0}</td>
-                    </tr>
-                  `;
-                })}
+                ${(() => {
+                  const stats = this.getDisplayedStats();
+                  if (!stats || !stats.boats) return null;
+                  // boats: { trade: [sent, arrived, captured, destroyed], ... }
+                  return Object.entries(stats.boats)
+                    .filter(([boat]) =>
+                      ["trade", "trans", "wshp"].includes(boat),
+                    )
+                    .map(([boat, arr]) => {
+                      const [sent, arrived, captured, destroyed] =
+                        arr.map(Number);
+                      return html`
+                        <tr>
+                          <td>${this.getBuildingName(boat)}</td>
+                          <td class="text-center">${sent ?? 0}</td>
+                          <td class="text-center">${destroyed ?? 0}</td>
+                          <td class="text-center">${arrived ?? 0}</td>
+                        </tr>
+                      `;
+                    });
+                })()}
               </tbody>
             </table>
           </div>
@@ -557,19 +429,21 @@ export class PlayerInfoModal extends LitElement {
               </thead>
               <tbody>
                 ${(() => {
-                  const bs = this.getDisplayedBuildingStats();
-                  return Object.entries(bs)
-                    .filter(([b]) => ["atom", "hydrogen", "mirv"].includes(b))
-                    .map(([building, stats]) => {
-                      const typedStats = stats as NukeStat;
+                  const stats = this.getDisplayedStats();
+                  if (!stats || !stats.bombs) return null;
+                  // bombs: { abomb: [launched, landed, intercepted], ... }
+                  return Object.entries(stats.bombs)
+                    .filter(([bomb]) =>
+                      ["abomb", "hbomb", "mirv"].includes(bomb),
+                    )
+                    .map(([bomb, arr]) => {
+                      const [launched, landed, intercepted] = arr.map(Number);
                       return html`
                         <tr>
-                          <td>${this.getBuildingName(building)}</td>
-                          <td class="text-center">${typedStats.built ?? 0}</td>
-                          <td class="text-center">
-                            ${typedStats.destroyed ?? 0}
-                          </td>
-                          <td class="text-center">${typedStats.hits ?? 0}</td>
+                          <td>${this.getBuildingName(bomb)}</td>
+                          <td class="text-center">${launched ?? 0}</td>
+                          <td class="text-center">${landed ?? 0}</td>
+                          <td class="text-center">${intercepted ?? 0}</td>
                         </tr>
                       `;
                     });
