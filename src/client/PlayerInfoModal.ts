@@ -319,7 +319,7 @@ export class PlayerInfoModal extends LitElement {
         port: { built: portB, destroyed: portD, captured: portC, lost: portL },
         defense: { built: defB, destroyed: defD, captured: defC, lost: defL },
         sam: { built: samB, destroyed: samD, captured: samC, lost: samL },
-        silo: { built: siloB, destroyed: siloD, captured: siloL, lost: siloC },
+        silo: { built: siloB, destroyed: siloD, captured: siloC, lost: siloL },
         warship: { sent: warS, destroyed: warD, arrived: warA },
         transportShip: { sent: transS, destroyed: transD, arrived: transA },
         tradeShip: { sent: tradeS, destroyed: tradeD, arrived: tradeA },
@@ -432,7 +432,9 @@ export class PlayerInfoModal extends LitElement {
             </div>
             <div>
               <div class="text-xl font-semibold">
-                ${((this.wins / this.gamesPlayed) * 100).toFixed(1)}%
+                ${this.gamesPlayed === 0
+                  ? "0.0"
+                  : ((this.wins / this.gamesPlayed) * 100).toFixed(1)}%
               </div>
               <div class="text-gray-400">Win Rate</div>
             </div>
@@ -477,7 +479,7 @@ export class PlayerInfoModal extends LitElement {
                   const bs = this.getDisplayedBuildingStats();
                   return Object.entries(bs)
                     .filter(([b]) =>
-                      ["city", "port", "defense", "sam"].includes(b),
+                      ["city", "port", "defense", "sam", "silo"].includes(b),
                     )
                     .map(([building, stats]) => {
                       const typedStats = stats as BuildingStat;
@@ -547,9 +549,7 @@ export class PlayerInfoModal extends LitElement {
                 ${(() => {
                   const bs = this.getDisplayedBuildingStats();
                   return Object.entries(bs)
-                    .filter(([b]) =>
-                      ["atom", "hydrogen", "mirv", "silo"].includes(b),
-                    )
+                    .filter(([b]) => ["atom", "hydrogen", "mirv"].includes(b))
                     .map(([building, stats]) => {
                       const typedStats = stats as NukeStat;
                       return html`
