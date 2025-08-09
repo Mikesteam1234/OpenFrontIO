@@ -1,6 +1,7 @@
 import { html, LitElement } from "lit";
 import { customElement, query, state } from "lit/decorators.js";
 import { UserMeResponse } from "../core/ApiSchemas";
+import { getServerConfigFromClient } from "../core/configuration/ConfigLoader";
 
 type BuildingStat = {
   built: number;
@@ -687,7 +688,7 @@ export class PlayerInfoModal extends LitElement {
       this.publicId = player.publicId;
     }
 
-    this.loadFromApi();
+    this.loadFromApi(this.publicId);
 
     this.requestUpdate();
   }
@@ -697,135 +698,140 @@ export class PlayerInfoModal extends LitElement {
     this.playerAvatarUrl = "";
   }
 
-  private async loadFromApi(): Promise<void> {
+  private async loadFromApi(playerId: string): Promise<void> {
     try {
-      // const res = await fetch("https://api.openfront.io/player/l0nRGXvi", {
-      //   method: "GET",
-      //   headers: { Accept: "application/json" },
-      // });
-      // if (!res.ok) {
-      //   console.error("API error:", res.status, res.statusText);
-      //   return;
-      // }
-      // const data = await res.json();
+      const config = await getServerConfigFromClient();
+      const url = new URL(config.jwtIssuer());
+      url.pathname = "/player/" + playerId;
+      console.log(url);
+      const res = await fetch(url.toString());
+      //   const res = await fetch("https://api.openfront.io/player/l0nRGXvi", {
+      //     method: "GET",
+      //     headers: { Accept: "application/json" },
+      //   });
+      if (!res.ok) {
+        console.error("API error:", res.status, res.statusText);
+        return;
+      }
+      const data = await res.json();
 
       // ---- MOCK ----
-      const data = {
-        createdAt: "2025-06-11T09:33:37.022Z",
-        games: [
-          {
-            gameId: "vZqVWm6m",
-            start: "2025-07-21T01:37:36.396Z",
-            mode: "Free For All",
-            type: "Public",
-            map: "Australia",
-            difficulty: "Medium",
-            clientId: "mNDaav7X",
-          },
-          {
-            gameId: "GWPxcrnz",
-            start: "2025-07-20T02:22:50.210Z",
-            mode: "Free For All",
-            type: "Public",
-            map: "Baikal",
-            difficulty: "Medium",
-            clientId: "efutv1Ao",
-          },
-          {
-            gameId: "Nvv1NsEg",
-            start: "2025-07-20T02:16:53.317Z",
-            mode: "Free For All",
-            type: "Public",
-            map: "Australia",
-            difficulty: "Medium",
-            clientId: "A9Y2KQKi",
-          },
-          {
-            gameId: "c8YRuB3y",
-            start: "2025-07-19T04:25:53.820Z",
-            mode: "Free For All",
-            type: "Public",
-            map: "Black Sea",
-            difficulty: "Medium",
-            clientId: "uUqbusgr",
-          },
-          {
-            gameId: "tZaKFiK4",
-            start: "2025-07-19T04:07:35.796Z",
-            mode: "Free For All",
-            type: "Public",
-            map: "World",
-            difficulty: "Medium",
-            clientId: "ZNGErxX5",
-          },
-        ],
-        stats: {
-          Private: {
-            "Free For All": {
-              Medium: {
-                wins: "0",
-                losses: "1",
-                total: "1",
-                stats: {
-                  attacks: ["4626208", "4304566", "423634"],
-                  betrayals: "2",
-                  boats: {
-                    trade: ["7", "6", "0", "0"],
-                    trans: ["6", "0", "0", "0"],
-                  },
-                  bombs: {
-                    abomb: ["0", "0", "0"],
-                    hbomb: ["0", "0", "0"],
-                    mirv: ["0", "0", "0"],
-                    mirvw: ["0", "0", "0"],
-                  },
-                  gold: ["453046", "0", "0", "0"],
-                  units: {
-                    city: ["1", "0", "2", "3"],
-                    defp: ["0", "0", "0", "0"],
-                    port: ["2", "0", "1", "3"],
-                    saml: ["0", "0", "0", "0"],
-                    silo: ["0", "0", "0", "0"],
-                    wshp: ["0", "0", "0", "0"],
-                  },
-                },
-              },
-            },
-          },
-          Public: {
-            "Free For All": {
-              Medium: {
-                wins: "0",
-                losses: "10",
-                total: "10",
-                stats: {
-                  attacks: ["87006524", "88219287", "48408649"],
-                  betrayals: "3",
-                  boats: {
-                    trade: ["82", "80", "0", "7"],
-                    trans: ["303", "0", "0", "17"],
-                  },
-                  bombs: {
-                    abomb: ["4", "3", "5"],
-                    hbomb: ["7", "8", "0"],
-                    mirv: ["0", "0", "0"],
-                    mirvw: ["0", "0", "0"],
-                  },
-                  gold: ["5938721", "241056", "0", "0"],
-                  units: {
-                    city: ["27", "31", "27", "52"],
-                    defp: ["35", "42", "38", "72"],
-                    port: ["21", "17", "36", "54"],
-                    saml: ["3", "4", "1", "3"],
-                    silo: ["9", "4", "3", "11"],
-                    wshp: ["26", "22", "0", "19"],
-                  },
-                },
-              },
-            },
-          },
-        },
-      };
+      //   const data = {
+      //     createdAt: "2025-06-11T09:33:37.022Z",
+      //     games: [
+      //       {
+      //         gameId: "vZqVWm6m",
+      //         start: "2025-07-21T01:37:36.396Z",
+      //         mode: "Free For All",
+      //         type: "Public",
+      //         map: "Australia",
+      //         difficulty: "Medium",
+      //         clientId: "mNDaav7X",
+      //       },
+      //       {
+      //         gameId: "GWPxcrnz",
+      //         start: "2025-07-20T02:22:50.210Z",
+      //         mode: "Free For All",
+      //         type: "Public",
+      //         map: "Baikal",
+      //         difficulty: "Medium",
+      //         clientId: "efutv1Ao",
+      //       },
+      //       {
+      //         gameId: "Nvv1NsEg",
+      //         start: "2025-07-20T02:16:53.317Z",
+      //         mode: "Free For All",
+      //         type: "Public",
+      //         map: "Australia",
+      //         difficulty: "Medium",
+      //         clientId: "A9Y2KQKi",
+      //       },
+      //       {
+      //         gameId: "c8YRuB3y",
+      //         start: "2025-07-19T04:25:53.820Z",
+      //         mode: "Free For All",
+      //         type: "Public",
+      //         map: "Black Sea",
+      //         difficulty: "Medium",
+      //         clientId: "uUqbusgr",
+      //       },
+      //       {
+      //         gameId: "tZaKFiK4",
+      //         start: "2025-07-19T04:07:35.796Z",
+      //         mode: "Free For All",
+      //         type: "Public",
+      //         map: "World",
+      //         difficulty: "Medium",
+      //         clientId: "ZNGErxX5",
+      //       },
+      //     ],
+      //     stats: {
+      //       Private: {
+      //         "Free For All": {
+      //           Medium: {
+      //             wins: "0",
+      //             losses: "1",
+      //             total: "1",
+      //             stats: {
+      //               attacks: ["4626208", "4304566", "423634"],
+      //               betrayals: "2",
+      //               boats: {
+      //                 trade: ["7", "6", "0", "0"],
+      //                 trans: ["6", "0", "0", "0"],
+      //               },
+      //               bombs: {
+      //                 abomb: ["0", "0", "0"],
+      //                 hbomb: ["0", "0", "0"],
+      //                 mirv: ["0", "0", "0"],
+      //                 mirvw: ["0", "0", "0"],
+      //               },
+      //               gold: ["453046", "0", "0", "0"],
+      //               units: {
+      //                 city: ["1", "0", "2", "3"],
+      //                 defp: ["0", "0", "0", "0"],
+      //                 port: ["2", "0", "1", "3"],
+      //                 saml: ["0", "0", "0", "0"],
+      //                 silo: ["0", "0", "0", "0"],
+      //                 wshp: ["0", "0", "0", "0"],
+      //               },
+      //             },
+      //           },
+      //         },
+      //       },
+      //       Public: {
+      //         "Free For All": {
+      //           Medium: {
+      //             wins: "0",
+      //             losses: "10",
+      //             total: "10",
+      //             stats: {
+      //               attacks: ["87006524", "88219287", "48408649"],
+      //               betrayals: "3",
+      //               boats: {
+      //                 trade: ["82", "80", "0", "7"],
+      //                 trans: ["303", "0", "0", "17"],
+      //               },
+      //               bombs: {
+      //                 abomb: ["4", "3", "5"],
+      //                 hbomb: ["7", "8", "0"],
+      //                 mirv: ["0", "0", "0"],
+      //                 mirvw: ["0", "0", "0"],
+      //               },
+      //               gold: ["5938721", "241056", "0", "0"],
+      //               units: {
+      //                 city: ["27", "31", "27", "52"],
+      //                 defp: ["35", "42", "38", "72"],
+      //                 port: ["21", "17", "36", "54"],
+      //                 saml: ["3", "4", "1", "3"],
+      //                 silo: ["9", "4", "3", "11"],
+      //                 wshp: ["26", "22", "0", "19"],
+      //               },
+      //             },
+      //           },
+      //         },
+      //       },
+      //     },
+      //   };
       // ----------------------------------------------------------------------
 
       if (data?.stats) {
