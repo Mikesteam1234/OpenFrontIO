@@ -111,23 +111,6 @@ export class PlayerInfoModal extends LitElement {
     return storedName ?? "";
   }
 
-  private getBuildingName(building: string): string {
-    const buildingNames: Record<string, string> = {
-      city: "City",
-      port: "Port",
-      defense: "Defense",
-      warship: "Warship",
-      atom: "Atom Bomb",
-      hydrogen: "Hydrogen Bomb",
-      mirv: "MIRV",
-      silo: "Missile Silo",
-      sam: "SAM",
-      transportShip: "Transport Ship",
-      tradeShip: "Trade Ship",
-    };
-    return buildingNames[building] ?? building;
-  }
-
   connectedCallback() {
     super.connectedCallback();
   }
