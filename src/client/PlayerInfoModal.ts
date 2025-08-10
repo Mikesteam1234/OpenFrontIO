@@ -39,7 +39,6 @@ export class PlayerInfoModal extends LitElement {
     map: string;
     difficulty: string;
     type: string;
-    won: boolean;
     gameMode: "ffa" | "team";
     teamCount?: number;
     teamColor?: string;
@@ -50,7 +49,6 @@ export class PlayerInfoModal extends LitElement {
       map: "Australia",
       difficulty: "Medium",
       type: "Public",
-      won: true,
       gameMode: "ffa",
     },
     {
@@ -59,7 +57,6 @@ export class PlayerInfoModal extends LitElement {
       map: "Baikal",
       difficulty: "Medium",
       type: "Public",
-      won: false,
       gameMode: "team",
       teamCount: 2,
       teamColor: "blue",
@@ -70,7 +67,6 @@ export class PlayerInfoModal extends LitElement {
       map: "World",
       difficulty: "Medium",
       type: "Private",
-      won: true,
       gameMode: "team",
       teamCount: 3,
       teamColor: "red",
@@ -472,13 +468,6 @@ export class PlayerInfoModal extends LitElement {
                               </div>
                             `
                           : null}
-                        <div
-                          class="text-xs ${game.won
-                            ? "text-green-400"
-                            : "text-red-400"}"
-                        >
-                          ${game.won ? "Victory" : "Defeat"}
-                        </div>
                       </div>
                       <div class="flex gap-2">
                         <button
