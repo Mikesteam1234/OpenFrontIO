@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { base64urlToUuid } from "./Base64";
+import { PlayerStatsSchema } from "./StatsSchemas";
 
 export const RefreshResponseSchema = z.object({
   token: z.string(),
@@ -48,3 +49,21 @@ export const UserMeResponseSchema = z.object({
   }),
 });
 export type UserMeResponse = z.infer<typeof UserMeResponseSchema>;
+
+export const PlayerApiTopSchema = z
+  .object({
+    createdAt: z.string(),
+    games: z.array(
+      z.object({
+        gameId: z.string(),
+        start: z.string(),
+        mode: z.string(),
+        type: z.string(),
+        map: z.string(),
+        difficulty: z.string(),
+        clientId: z.string(),
+      }),
+    ),
+    stats: PlayerStatsSchema,
+  })
+  .strict();

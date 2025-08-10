@@ -1,22 +1,9 @@
 import { html, LitElement } from "lit";
 import { customElement, query, state } from "lit/decorators.js";
-import { UserMeResponse } from "../core/ApiSchemas";
+import { PlayerApiTopSchema, UserMeResponse } from "../core/ApiSchemas";
 import { getServerConfigFromClient } from "../core/configuration/ConfigLoader";
 import { PlayerStats, PlayerStatsSchema } from "../core/StatsSchemas";
 import "./components/baseComponents/PlayerStatsGrid";
-
-// for test
-type PlayerApiResponse = {
-  stats?: unknown;
-  games?: Array<{
-    gameId: string;
-    start: string;
-    map: string;
-    difficulty: string;
-    type: string;
-    mode?: string;
-  }>;
-};
 
 @customElement("player-info-modal")
 export class PlayerInfoModal extends LitElement {
@@ -577,32 +564,39 @@ export class PlayerInfoModal extends LitElement {
       const config = await getServerConfigFromClient();
       const url = new URL(config.jwtIssuer());
       url.pathname = "/player/" + playerId;
-      console.log(url);
-      const res = await fetch(url.toString());
+
+      const res = await fetch(url.toString(), {
+        headers: { Accept: "application/json" },
+        cache: "no-store",
+      });
       if (!res.ok) {
         console.error("API error:", res.status, res.statusText);
         return;
       }
-      const data = (await res.json()) as PlayerApiResponse;
 
-      if (data?.stats) {
-        this.applyBackendStats(data.stats);
+      const json = await res.json();
+
+      const parsed = PlayerApiTopSchema.safeParse(json);
+      if (!parsed.success) {
+        console.error("PlayerApiTopSchema validation failed:", parsed.error);
+        return;
       }
 
-      if (Array.isArray(data?.games)) {
-        this.recentGames = data.games.map((g) => ({
-          gameId: g.gameId,
-          start: g.start,
-          map: g.map,
-          difficulty: g.difficulty,
-          type: g.type,
-          won: false,
-          gameMode:
-            g.mode && String(g.mode).toLowerCase().includes("team")
-              ? "team"
-              : "ffa",
-        }));
-      }
+      const data = parsed.data;
+
+      this.applyBackendStats(data.stats);
+
+      this.recentGames = data.games.map((g) => ({
+        gameId: g.gameId,
+        start: g.start,
+        map: g.map,
+        difficulty: g.difficulty,
+        type: g.type,
+        gameMode:
+          g.mode && String(g.mode).toLowerCase().includes("team")
+            ? "team"
+            : "ffa",
+      }));
 
       this.requestUpdate();
     } catch (err) {
