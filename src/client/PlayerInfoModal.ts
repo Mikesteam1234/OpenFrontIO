@@ -1,8 +1,9 @@
 import { html, LitElement } from "lit";
 import { customElement, query, state } from "lit/decorators.js";
 import { UserMeResponse } from "../core/ApiSchemas";
-import { PlayerStats, PlayerStatsSchema } from "../core/StatsSchemas";
 import { getServerConfigFromClient } from "../core/configuration/ConfigLoader";
+import { PlayerStats, PlayerStatsSchema } from "../core/StatsSchemas";
+import "./components/baseComponents/PlayerStatsGrid";
 
 // for test
 type PlayerApiResponse = {
@@ -306,42 +307,28 @@ export class PlayerInfoModal extends LitElement {
 
           <hr class="w-2/3 border-gray-600 my-2" />
 
-          <div
-            class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm text-white text-center mb-2"
-          >
-            <div>
-              <div class="text-xl font-semibold">${this.wins ?? 0}</div>
-              <div class="text-gray-400">Wins</div>
-            </div>
-            <div>
-              <div class="text-xl font-semibold">${this.losses}</div>
-              <div class="text-gray-400">Losses</div>
-            </div>
-            <div>
-              <div class="text-xl font-semibold">
-                ${this.gamesPlayed === 0
-                  ? "0.0"
-                  : ((this.wins / this.gamesPlayed) * 100).toFixed(1)}%
-              </div>
-              <div class="text-gray-400">Win Rate</div>
-            </div>
-            <div>
-              <div class="text-xl font-semibold">${this.gamesPlayed}</div>
-              <div class="text-gray-400">Games Played</div>
-            </div>
-            <div>
-              <div class="text-xl font-semibold">
-                ${this.playTimeSeconds
-                  ? this.formatPlayTime(this.playTimeSeconds)
-                  : "0h 0m"}
-              </div>
-              <div class="text-gray-400">Play Time</div>
-            </div>
-            <div>
-              <div class="text-xl font-semibold">${this.lastActive}</div>
-              <div class="text-gray-400">Last Active</div>
-            </div>
-          </div>
+          <player-stats-grid
+            .titles=${[
+              "Wins",
+              "Losses",
+              "Win Rate",
+              "Games Played",
+              "Play Time",
+              "Last Active",
+            ]}
+            .values=${[
+              this.wins,
+              this.losses,
+              this.gamesPlayed === 0
+                ? "0.0"
+                : ((this.wins / this.gamesPlayed) * 100).toFixed(1) + "%",
+              this.gamesPlayed,
+              this.playTimeSeconds
+                ? this.formatPlayTime(this.playTimeSeconds)
+                : "0h 0m",
+              this.lastActive,
+            ]}
+          ></player-stats-grid>
 
           <hr class="w-2/3 border-gray-600 my-2" />
 
