@@ -4,6 +4,7 @@ import { PlayerApiTopSchema, UserMeResponse } from "../core/ApiSchemas";
 import { getServerConfigFromClient } from "../core/configuration/ConfigLoader";
 import { PlayerStats, PlayerStatsSchema } from "../core/StatsSchemas";
 import "./components/baseComponents/PlayerStatsGrid";
+import "./components/baseComponents/PlayerStatsTable";
 
 @customElement("player-info-modal")
 export class PlayerInfoModal extends LitElement {
@@ -145,6 +146,7 @@ export class PlayerInfoModal extends LitElement {
         return this.statsAll;
     }
   }
+
   private setVisibility(v: "all" | "public" | "private") {
     this.visibility = v;
     const t = this.totalsByVisibility[v];
@@ -317,123 +319,9 @@ export class PlayerInfoModal extends LitElement {
 
           <hr class="w-2/3 border-gray-600 my-2" />
 
-          <div class="mt-4 w-full max-w-md">
-            <div class="text-sm text-gray-400 font-semibold mb-1">
-              🏗️ Building Statistics
-            </div>
-            <table class="w-full text-sm text-gray-300 border-collapse">
-              <thead>
-                <tr class="border-b border-gray-600">
-                  <th class="text-left w-1/5">Building</th>
-                  <th class="text-center w-1/5">Built</th>
-                  <th class="text-center w-1/5">Destroyed</th>
-                  <th class="text-center w-1/5">Captured</th>
-                  <th class="text-center w-1/5">Lost</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${(() => {
-                  const stats = this.getDisplayedStats();
-                  if (!stats || !stats.units) return null;
-                  // units: { city: [built, destroyed, captured, lost], ... }
-                  return Object.entries(stats.units)
-                    .filter(([unit]) =>
-                      ["city", "port", "defp", "saml", "silo"].includes(unit),
-                    )
-                    .map(([unit, arr]) => {
-                      const [built, destroyed, captured, lost] =
-                        arr.map(Number);
-                      return html`
-                        <tr>
-                          <td>${this.getBuildingName(unit)}</td>
-                          <td class="text-center">${built ?? 0}</td>
-                          <td class="text-center">${destroyed ?? 0}</td>
-                          <td class="text-center">${captured ?? 0}</td>
-                          <td class="text-center">${lost ?? 0}</td>
-                        </tr>
-                      `;
-                    });
-                })()}
-              </tbody>
-            </table>
-          </div>
-
-          <div class="mt-4 w-full max-w-md">
-            <div class="text-sm text-gray-400 font-semibold mb-1">
-              🚢 Ship Arrivals
-            </div>
-            <table class="w-full text-sm text-gray-300 border-collapse">
-              <thead>
-                <tr class="border-b border-gray-600">
-                  <th class="text-left w-2/5">Ship Type</th>
-                  <th class="text-center w-1/5">Sent</th>
-                  <th class="text-center w-1/5">Destroyed</th>
-                  <th class="text-center w-1/5">Arrived</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${(() => {
-                  const stats = this.getDisplayedStats();
-                  if (!stats || !stats.boats) return null;
-                  // boats: { trade: [sent, arrived, captured, destroyed], ... }
-                  return Object.entries(stats.boats)
-                    .filter(([boat]) =>
-                      ["trade", "trans", "wshp"].includes(boat),
-                    )
-                    .map(([boat, arr]) => {
-                      const [sent, arrived, captured, destroyed] =
-                        arr.map(Number);
-                      return html`
-                        <tr>
-                          <td>${this.getBuildingName(boat)}</td>
-                          <td class="text-center">${sent ?? 0}</td>
-                          <td class="text-center">${destroyed ?? 0}</td>
-                          <td class="text-center">${arrived ?? 0}</td>
-                        </tr>
-                      `;
-                    });
-                })()}
-              </tbody>
-            </table>
-          </div>
-
-          <div class="mt-4 w-full max-w-md">
-            <div class="text-sm text-gray-400 font-semibold mb-1">
-              ☢️ Nuke Statistics
-            </div>
-            <table class="w-full text-sm text-gray-300 border-collapse">
-              <thead>
-                <tr class="border-b border-gray-600">
-                  <th class="text-left w-2/5">Weapon</th>
-                  <th class="text-center w-1/5">Built</th>
-                  <th class="text-center w-1/5">Destroyed</th>
-                  <th class="text-center w-1/5">Hits</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${(() => {
-                  const stats = this.getDisplayedStats();
-                  if (!stats || !stats.bombs) return null;
-                  // bombs: { abomb: [launched, landed, intercepted], ... }
-                  return Object.entries(stats.bombs)
-                    .filter(([bomb]) =>
-                      ["abomb", "hbomb", "mirv"].includes(bomb),
-                    )
-                    .map(([bomb, arr]) => {
-                      const [launched, landed, intercepted] = arr.map(Number);
-                      return html`
-                        <tr>
-                          <td>${this.getBuildingName(bomb)}</td>
-                          <td class="text-center">${launched ?? 0}</td>
-                          <td class="text-center">${landed ?? 0}</td>
-                          <td class="text-center">${intercepted ?? 0}</td>
-                        </tr>
-                      `;
-                    });
-                })()}
-              </tbody>
-            </table>
-          </div>
+          <player-stats-table
+            .stats=${this.getDisplayedStats()}
+          ></player-stats-table>
 
           <hr class="w-2/3 border-gray-600 my-2" />
 
