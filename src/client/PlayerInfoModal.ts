@@ -140,44 +140,84 @@ export class PlayerInfoModal extends LitElement {
   }
 
   private applyBackendStats(rawStats: any): void {
-    const pubStats = PlayerStatsSchema.safeParse(
-      rawStats?.Public?.["Free For All"]?.Medium?.stats ?? {},
-    );
-    const prvStats = PlayerStatsSchema.safeParse(
-      rawStats?.Private?.["Free For All"]?.Medium?.stats ?? {},
-    );
-    this.statsPublic = pubStats.success ? pubStats.data : null;
-    this.statsPrivate = prvStats.success ? prvStats.data : null;
-    if (this.statsPublic && this.statsPrivate) {
-      this.statsAll = this.mergePlayerStats(
-        this.statsPublic,
-        this.statsPrivate,
-      );
-    } else {
-      this.statsAll = this.statsPublic ?? this.statsPrivate;
+    let pubStatsAgg: PlayerStats | null = null;
+    let prvStatsAgg: PlayerStats | null = null;
+
+    const totals = {
+      public: { wins: 0, losses: 0, total: 0 },
+      private: { wins: 0, losses: 0, total: 0 },
+    } as const;
+
+    const publicTotals = { ...totals.public };
+    const privateTotals = { ...totals.private };
+
+    for (const modeNode of Object.values(rawStats ?? {})) {
+      if (!modeNode || typeof modeNode !== "object") continue;
+
+      for (const [typeKey, typeNode] of Object.entries<any>(modeNode)) {
+        if (!typeNode || typeof typeNode !== "object") continue;
+        const vis: "public" | "private" | null =
+          typeKey === "Public"
+            ? "public"
+            : typeKey === "Private"
+              ? "private"
+              : null;
+        if (!vis) continue;
+
+        for (const diffNode of Object.values<any>(typeNode)) {
+          if (!diffNode || typeof diffNode !== "object") continue;
+
+          const parsed = PlayerStatsSchema.safeParse(diffNode.stats ?? {});
+          if (parsed.success) {
+            if (vis === "public") {
+              pubStatsAgg = pubStatsAgg
+                ? this.mergePlayerStats(pubStatsAgg, parsed.data)
+                : parsed.data;
+            } else {
+              prvStatsAgg = prvStatsAgg
+                ? this.mergePlayerStats(prvStatsAgg, parsed.data)
+                : parsed.data;
+            }
+          }
+
+          const wins = Number((diffNode as any).wins ?? 0);
+          const losses = Number((diffNode as any).losses ?? 0);
+          const total = Number((diffNode as any).total ?? 0);
+          if (vis === "public") {
+            publicTotals.wins += wins;
+            publicTotals.losses += losses;
+            publicTotals.total += total;
+          } else {
+            privateTotals.wins += wins;
+            privateTotals.losses += losses;
+            privateTotals.total += total;
+          }
+        }
+      }
     }
-    const pub = rawStats?.Public?.["Free For All"]?.Medium;
-    const prv = rawStats?.Private?.["Free For All"]?.Medium;
-    const allWins = Number(pub?.wins ?? 0) + Number(prv?.wins ?? 0);
-    const allLosses = Number(pub?.losses ?? 0) + Number(prv?.losses ?? 0);
-    const allTotal = Number(pub?.total ?? 0) + Number(prv?.total ?? 0);
+
+    this.statsPublic = pubStatsAgg;
+    this.statsPrivate = prvStatsAgg;
+    this.statsAll =
+      this.statsPublic && this.statsPrivate
+        ? this.mergePlayerStats(this.statsPublic, this.statsPrivate)
+        : (this.statsPublic ?? this.statsPrivate);
+
+    const allWins = publicTotals.wins + privateTotals.wins;
+    const allLosses = publicTotals.losses + privateTotals.losses;
+    const allTotal = publicTotals.total + privateTotals.total;
+
     this.totalsByVisibility = {
       all: { wins: allWins, losses: allLosses, total: allTotal },
-      public: {
-        wins: Number(pub?.wins ?? 0),
-        losses: Number(pub?.losses ?? 0),
-        total: Number(pub?.total ?? 0),
-      },
-      private: {
-        wins: Number(prv?.wins ?? 0),
-        losses: Number(prv?.losses ?? 0),
-        total: Number(prv?.total ?? 0),
-      },
+      public: { ...publicTotals },
+      private: { ...privateTotals },
     };
+
     const t = this.totalsByVisibility[this.visibility];
     this.wins = t.wins;
     this.losses = t.losses;
     this.gamesPlayed = t.total;
+
     this.requestUpdate();
   }
 
