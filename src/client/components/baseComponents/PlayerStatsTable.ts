@@ -148,6 +148,48 @@ export class PlayerStatsTable extends LitElement {
           </tbody>
         </table>
       </div>
+
+      <div class="table-container">
+        <div class="section-title">📊 Player Metrics</div>
+        <table>
+          <thead>
+            <tr>
+              <th>attack</th>
+              <th>sent</th>
+              <th>received</th>
+              <th>cancelled</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Count</td>
+              <td>${Number((stats?.attacks ?? [0, 0, 0])[0] ?? 0)}</td>
+              <td>${Number((stats?.attacks ?? [0, 0, 0])[1] ?? 0)}</td>
+              <td>${Number((stats?.attacks ?? [0, 0, 0])[2] ?? 0)}</td>
+            </tr>
+          </tbody>
+        </table>
+        <table style="margin-top: 0.75rem;">
+          <thead>
+            <tr>
+              <th>gold</th>
+              <th>workers</th>
+              <th>war</th>
+              <th>trade</th>
+              <th>steal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Count</td>
+              <td>${Number((stats?.gold ?? [0, 0, 0, 0])[0] ?? 0)}</td>
+              <td>${Number((stats?.gold ?? [0, 0, 0, 0])[1] ?? 0)}</td>
+              <td>${Number((stats?.gold ?? [0, 0, 0, 0])[2] ?? 0)}</td>
+              <td>${Number((stats?.gold ?? [0, 0, 0, 0])[3] ?? 0)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     `;
   }
 }
