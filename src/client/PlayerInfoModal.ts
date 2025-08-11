@@ -14,27 +14,25 @@ export class PlayerInfoModal extends LitElement {
   };
 
   @state() private userMeResponse: UserMeResponse | null = null;
-
-  @state() private wins: number = 57;
-  @state() private playTimeSeconds: number = 5 * 3600 + 33 * 60;
-  @state() private gamesPlayed: number = 119;
-  @state() private losses: number = 62;
-  @state() private lastActive: string = "1992/4/27";
-
-  @state() private statsPublic: PlayerStats | null = null;
-  @state() private statsPrivate: PlayerStats | null = null;
-  @state() private statsAll: PlayerStats | null = null;
   @state() private visibility: "all" | "public" | "private" = "all";
-  @state() private totalsByVisibility: Record<
-    "all" | "public" | "private",
-    { wins: number; losses: number; total: number }
-  > = {
-    all: { wins: 0, losses: 0, total: 0 },
-    public: { wins: 0, losses: 0, total: 0 },
-    private: { wins: 0, losses: 0, total: 0 },
-  };
+  @state() private expandedGameId: string | null = null;
 
-  @state() private recentGames: {
+  private statsPublic: PlayerStats | null = null;
+  private statsPrivate: PlayerStats | null = null;
+  private statsAll: PlayerStats | null = null;
+
+  private _publicTotalsCache: {
+    wins: number;
+    losses: number;
+    total: number;
+  } | null = null;
+  private _privateTotalsCache: {
+    wins: number;
+    losses: number;
+    total: number;
+  } | null = null;
+
+  private recentGames: {
     gameId: string;
     start: string;
     map: string;
@@ -43,38 +41,25 @@ export class PlayerInfoModal extends LitElement {
     gameMode: "ffa" | "team";
     teamCount?: number;
     teamColor?: string;
-  }[] = [
-    {
-      gameId: "tGadjhgg",
-      start: "2025-08-08T10:00:00Z",
-      map: "Australia",
-      difficulty: "Medium",
-      type: "Public",
-      gameMode: "ffa",
-    },
-    {
-      gameId: "I7XQ63rt",
-      start: "2025-08-07T09:00:00Z",
-      map: "Baikal",
-      difficulty: "Medium",
-      type: "Public",
-      gameMode: "team",
-      teamCount: 2,
-      teamColor: "blue",
-    },
-    {
-      gameId: "Chocolat",
-      start: "2025-08-06T11:30:00Z",
-      map: "World",
-      difficulty: "Medium",
-      type: "Private",
-      gameMode: "team",
-      teamCount: 3,
-      teamColor: "red",
-    },
-  ];
+  }[] = [];
 
-  @state() private expandedGameId: string | null = null;
+  private computeTotalsByVisibility(): Record<
+    "all" | "public" | "private",
+    { wins: number; losses: number; total: number }
+  > {
+    const zero = { wins: 0, losses: 0, total: 0 };
+    const pub = this._publicTotalsCache ?? zero;
+    const prv = this._privateTotalsCache ?? zero;
+    return {
+      all: {
+        wins: pub.wins + prv.wins,
+        losses: pub.losses + prv.losses,
+        total: pub.total + prv.total,
+      },
+      public: { ...pub },
+      private: { ...prv },
+    };
+  }
 
   private viewGame(gameId: string): void {
     this.close();
@@ -132,10 +117,6 @@ export class PlayerInfoModal extends LitElement {
 
   private setVisibility(v: "all" | "public" | "private") {
     this.visibility = v;
-    const t = this.totalsByVisibility[v];
-    this.wins = t.wins;
-    this.losses = t.losses;
-    this.gamesPlayed = t.total;
     this.requestUpdate();
   }
 
@@ -203,20 +184,8 @@ export class PlayerInfoModal extends LitElement {
         ? this.mergePlayerStats(this.statsPublic, this.statsPrivate)
         : (this.statsPublic ?? this.statsPrivate);
 
-    const allWins = publicTotals.wins + privateTotals.wins;
-    const allLosses = publicTotals.losses + privateTotals.losses;
-    const allTotal = publicTotals.total + privateTotals.total;
-
-    this.totalsByVisibility = {
-      all: { wins: allWins, losses: allLosses, total: allTotal },
-      public: { ...publicTotals },
-      private: { ...privateTotals },
-    };
-
-    const t = this.totalsByVisibility[this.visibility];
-    this.wins = t.wins;
-    this.losses = t.losses;
-    this.gamesPlayed = t.total;
+    this._publicTotalsCache = { ...publicTotals };
+    this._privateTotalsCache = { ...privateTotals };
 
     this.requestUpdate();
   }
@@ -251,6 +220,21 @@ export class PlayerInfoModal extends LitElement {
       : u?.discriminator !== undefined
         ? `https://cdn.discordapp.com/embed/avatars/${Number(u.discriminator) % 5}.png`
         : "";
+
+    const totalsByVisibility = this.computeTotalsByVisibility();
+    const visTotals = totalsByVisibility[this.visibility];
+    const wins = visTotals?.wins ?? 0;
+    const losses = visTotals?.losses ?? 0;
+    const gamesPlayed = visTotals?.total ?? 0;
+    const winRate =
+      gamesPlayed === 0 ? "0.0" : ((wins / gamesPlayed) * 100).toFixed(1) + "%";
+    const lastActive = this.recentGames.length
+      ? new Date(
+          Math.max(...this.recentGames.map((g) => Date.parse(g.start))),
+        ).toLocaleDateString()
+      : "N/A";
+    const playTimeText = "N/A";
+
     return html`
       <o-modal id="playerInfoModal" title="Player Info" alwaysMaximized>
         <div class="flex flex-col items-center mt-2 mb-4">
@@ -325,16 +309,12 @@ export class PlayerInfoModal extends LitElement {
               "Last Active",
             ]}
             .values=${[
-              this.wins,
-              this.losses,
-              this.gamesPlayed === 0
-                ? "0.0"
-                : ((this.wins / this.gamesPlayed) * 100).toFixed(1) + "%",
-              this.gamesPlayed,
-              this.playTimeSeconds
-                ? this.formatPlayTime(this.playTimeSeconds)
-                : "0h 0m",
-              this.lastActive,
+              wins,
+              losses,
+              winRate,
+              gamesPlayed,
+              playTimeText,
+              lastActive,
             ]}
           ></player-stats-grid>
 
