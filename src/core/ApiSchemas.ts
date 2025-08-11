@@ -51,34 +51,32 @@ export const UserMeResponseSchema = z.object({
 });
 export type UserMeResponse = z.infer<typeof UserMeResponseSchema>;
 
-export const PlayerApiTopSchema = z
-  .object({
-    createdAt: z.string(),
-    games: z.array(
-      z.object({
-        gameId: z.string(),
-        start: z.string(),
-        mode: z.string(),
-        type: z.string(),
-        map: z.string(),
-        difficulty: z.string(),
-        clientId: z.string(),
-      }),
-    ),
-    stats: z.record(
-      z.enum(GameMode),
-      z.record(
-        z.enum(GameType),
-        z.record(
-          z.enum(Difficulty),
-          z.object({
-            wins: z.string(),
-            losses: z.string(),
-            total: z.string(),
-            stats: PlayerStatsSchema,
-          }),
-        ),
+export const PlayerApiTopSchema = z.object({
+  createdAt: z.string(),
+  games: z.array(
+    z.object({
+      gameId: z.string(),
+      start: z.string(),
+      mode: z.string(),
+      type: z.string(),
+      map: z.string(),
+      difficulty: z.string(),
+      clientId: z.string(),
+    }),
+  ),
+  stats: z.partialRecord(
+    z.enum(GameMode),
+    z.partialRecord(
+      z.enum(GameType),
+      z.partialRecord(
+        z.enum(Difficulty),
+        z.object({
+          wins: z.string(),
+          losses: z.string(),
+          total: z.string(),
+          stats: PlayerStatsSchema,
+        }),
       ),
     ),
-  })
-  .strict();
+  ),
+});
