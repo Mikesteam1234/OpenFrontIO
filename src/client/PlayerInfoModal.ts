@@ -132,20 +132,20 @@ export class PlayerInfoModal extends LitElement {
     const publicTotals = { ...totals.public };
     const privateTotals = { ...totals.private };
 
-    for (const modeNode of Object.values(rawStats ?? {})) {
-      if (!modeNode || typeof modeNode !== "object") continue;
+    for (const [typeKey, typeNode] of Object.entries<any>(rawStats ?? {})) {
+      if (!typeNode || typeof typeNode !== "object") continue;
+      const vis: "public" | "private" | null =
+        typeKey === "Public"
+          ? "public"
+          : typeKey === "Private"
+            ? "private"
+            : null;
+      if (!vis) continue;
 
-      for (const [typeKey, typeNode] of Object.entries<any>(modeNode)) {
-        if (!typeNode || typeof typeNode !== "object") continue;
-        const vis: "public" | "private" | null =
-          typeKey === "Public"
-            ? "public"
-            : typeKey === "Private"
-              ? "private"
-              : null;
-        if (!vis) continue;
+      for (const modeNode of Object.values<any>(typeNode)) {
+        if (!modeNode || typeof modeNode !== "object") continue;
 
-        for (const diffNode of Object.values<any>(typeNode)) {
+        for (const diffNode of Object.values<any>(modeNode)) {
           if (!diffNode || typeof diffNode !== "object") continue;
 
           const parsed = PlayerStatsSchema.safeParse(diffNode.stats ?? {});
