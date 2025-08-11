@@ -65,9 +65,9 @@ export const PlayerApiTopSchema = z.object({
     }),
   ),
   stats: z.partialRecord(
-    z.enum(GameMode),
+    z.enum(GameType),
     z.partialRecord(
-      z.enum(GameType),
+      z.enum(GameMode),
       z.partialRecord(
         z.enum(Difficulty),
         z.object({
