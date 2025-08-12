@@ -302,7 +302,7 @@ export class PlayerInfoModal extends LitElement {
             .titles=${[
               "Wins",
               "Losses",
-              "Win Rate",
+              "Win:Loss Ratio",
               "Games Played",
               "Play Time",
               "Last Active",
@@ -310,7 +310,7 @@ export class PlayerInfoModal extends LitElement {
             .values=${[
               wins,
               losses,
-              winRate,
+              wlr,
               gamesPlayed,
               playTimeText,
               lastActive,
