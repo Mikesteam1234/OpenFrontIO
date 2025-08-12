@@ -51,7 +51,7 @@ export const UserMeResponseSchema = z.object({
 });
 export type UserMeResponse = z.infer<typeof UserMeResponseSchema>;
 
-export const PlayerApiTopSchema = z.object({
+export const PlayerIdResponseSchema = z.object({
   createdAt: z.string(),
   games: z.array(
     z.object({

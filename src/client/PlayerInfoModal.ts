@@ -1,6 +1,6 @@
 import { html, LitElement } from "lit";
 import { customElement, query, state } from "lit/decorators.js";
-import { PlayerApiTopSchema, UserMeResponse } from "../core/ApiSchemas";
+import { PlayerIdResponseSchema, UserMeResponse } from "../core/ApiSchemas";
 import { getServerConfigFromClient } from "../core/configuration/ConfigLoader";
 import { PlayerStats, PlayerStatsSchema } from "../core/StatsSchemas";
 import "./components/baseComponents/PlayerStatsGrid";
@@ -456,7 +456,7 @@ export class PlayerInfoModal extends LitElement {
 
       const json = await res.json();
 
-      const parsed = PlayerApiTopSchema.safeParse(json);
+      const parsed = PlayerIdResponseSchema.safeParse(json);
       if (!parsed.success) {
         console.error("PlayerApiTopSchema validation failed:", parsed.error);
         return;
