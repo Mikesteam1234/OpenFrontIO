@@ -65,12 +65,12 @@ export const PlayerIdResponseSchema = z.object({
   games: z.array(
     z.object({
       gameId: z.string(),
-      start: z.string(),
-      mode: z.string(),
-      type: z.string(),
-      map: z.string(),
-      difficulty: z.string(),
-      clientId: z.string(),
+      start: z.iso.datetime(),
+      mode: z.enum(GameMode),
+      type: z.enum(GameType),
+      map: z.enum(GameMapType),
+      difficulty: z.enum(Difficulty),
+      clientId: z.string().optional(),
     }),
   ),
   stats: z.partialRecord(
