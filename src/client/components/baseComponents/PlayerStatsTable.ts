@@ -1,6 +1,7 @@
 import { css, html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { PlayerStats } from "../../../core/StatsSchemas";
+import { translateText } from "../../Utils";
 
 @customElement("player-stats-table")
 export class PlayerStatsTable extends LitElement {
@@ -35,7 +36,6 @@ export class PlayerStatsTable extends LitElement {
 
   @property({ type: Object }) stats: PlayerStats;
 
-
   render() {
     const stats = this.stats;
 
@@ -64,7 +64,7 @@ export class PlayerStatsTable extends LitElement {
               const lost = stats?.units?.[key]?.[3] ?? 0n;
               return html`
                 <tr>
-                  <td>${translateText(`something.${key}`)</td>
+                  <td>${translateText(`something.${key}`)}</td>
                   <td>${built}</td>
                   <td>${destroyed}</td>
                   <td>${captured}</td>
@@ -94,7 +94,7 @@ export class PlayerStatsTable extends LitElement {
               const destroyed = stats?.boats?.[key]?.[3] ?? 0n;
               return html`
                 <tr>
-                  <td>${this.getBuildingName(key)}</td>
+                  <td>${translateText(`something.${key}`)}</td>
                   <td>${sent}</td>
                   <td>${destroyed}</td>
                   <td>${arrived}</td>
@@ -123,7 +123,7 @@ export class PlayerStatsTable extends LitElement {
               const intercepted = stats?.bombs?.[bomb]?.[2] ?? 0n;
               return html`
                 <tr>
-                  <td>${this.getBuildingName(bomb)}</td>
+                  <td>${translateText(`something.${bomb}`)}</td>
                   <td class="text-center">${launched}</td>
                   <td class="text-center">${landed}</td>
                   <td class="text-center">${intercepted}</td>
