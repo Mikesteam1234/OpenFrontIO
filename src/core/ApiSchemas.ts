@@ -80,9 +80,9 @@ export const PlayerIdResponseSchema = z.object({
       z.partialRecord(
         z.enum(Difficulty),
         z.object({
-          wins: z.string(),
-          losses: z.string(),
-          total: z.string(),
+          wins: BigIntStringSchema,
+          losses: BigIntStringSchema,
+          total: BigIntStringSchema,
           stats: PlayerStatsSchema,
         }),
       ),
