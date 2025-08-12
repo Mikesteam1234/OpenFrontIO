@@ -77,15 +77,17 @@ export class PlayerStatsTable extends LitElement {
           </thead>
           <tbody>
             ${buildingKeys.map((key) => {
-              const arr = (stats?.units ?? {})[key] ?? [0, 0, 0, 0];
-              const [built, destroyed, captured, lost] = arr.map(Number);
+              const built = Number(stats?.units?.[key]?.[0] ?? 0);
+              const destroyed = Number(stats?.units?.[key]?.[1] ?? 0);
+              const captured = Number(stats?.units?.[key]?.[2] ?? 0);
+              const lost = Number(stats?.units?.[key]?.[3] ?? 0);
               return html`
                 <tr>
                   <td>${this.getBuildingName(key)}</td>
-                  <td>${built ?? 0}</td>
-                  <td>${destroyed ?? 0}</td>
-                  <td>${captured ?? 0}</td>
-                  <td>${lost ?? 0}</td>
+                  <td>${built}</td>
+                  <td>${destroyed}</td>
+                  <td>${captured}</td>
+                  <td>${lost}</td>
                 </tr>
               `;
             })}
@@ -106,14 +108,15 @@ export class PlayerStatsTable extends LitElement {
           </thead>
           <tbody>
             ${boatKeys.map((key) => {
-              const arr = (stats?.boats ?? {})[key] ?? [0, 0, 0, 0];
-              const [sent, arrived, _captured, destroyed] = arr.map(Number);
+              const sent = Number(stats?.boats?.[key]?.[0] ?? 0);
+              const arrived = Number(stats?.boats?.[key]?.[1] ?? 0);
+              const destroyed = Number(stats?.boats?.[key]?.[3] ?? 0);
               return html`
                 <tr>
                   <td>${this.getBuildingName(key)}</td>
-                  <td>${sent ?? 0}</td>
-                  <td>${destroyed ?? 0}</td>
-                  <td>${arrived ?? 0}</td>
+                  <td>${sent}</td>
+                  <td>${destroyed}</td>
+                  <td>${arrived}</td>
                 </tr>
               `;
             })}
@@ -134,14 +137,15 @@ export class PlayerStatsTable extends LitElement {
           </thead>
           <tbody>
             ${bombKeys.map((bomb) => {
-              const arr = (stats?.bombs ?? {})[bomb] ?? [0, 0, 0];
-              const [launched, landed, intercepted] = arr.map(Number);
+              const launched = Number(stats?.bombs?.[bomb]?.[0] ?? 0);
+              const landed = Number(stats?.bombs?.[bomb]?.[1] ?? 0);
+              const intercepted = Number(stats?.bombs?.[bomb]?.[2] ?? 0);
               return html`
                 <tr>
                   <td>${this.getBuildingName(bomb)}</td>
-                  <td class="text-center">${launched ?? 0}</td>
-                  <td class="text-center">${landed ?? 0}</td>
-                  <td class="text-center">${intercepted ?? 0}</td>
+                  <td class="text-center">${launched}</td>
+                  <td class="text-center">${landed}</td>
+                  <td class="text-center">${intercepted}</td>
                 </tr>
               `;
             })}
@@ -163,9 +167,9 @@ export class PlayerStatsTable extends LitElement {
           <tbody>
             <tr>
               <td>Count</td>
-              <td>${Number((stats?.attacks ?? [0, 0, 0])[0] ?? 0)}</td>
-              <td>${Number((stats?.attacks ?? [0, 0, 0])[1] ?? 0)}</td>
-              <td>${Number((stats?.attacks ?? [0, 0, 0])[2] ?? 0)}</td>
+              <td>${Number(stats?.attacks?.[0] ?? 0)}</td>
+              <td>${Number(stats?.attacks?.[1] ?? 0)}</td>
+              <td>${Number(stats?.attacks?.[2] ?? 0)}</td>
             </tr>
           </tbody>
         </table>
@@ -182,10 +186,10 @@ export class PlayerStatsTable extends LitElement {
           <tbody>
             <tr>
               <td>Count</td>
-              <td>${Number((stats?.gold ?? [0, 0, 0, 0])[0] ?? 0)}</td>
-              <td>${Number((stats?.gold ?? [0, 0, 0, 0])[1] ?? 0)}</td>
-              <td>${Number((stats?.gold ?? [0, 0, 0, 0])[2] ?? 0)}</td>
-              <td>${Number((stats?.gold ?? [0, 0, 0, 0])[3] ?? 0)}</td>
+              <td>${Number(stats?.gold?.[0] ?? 0)}</td>
+              <td>${Number(stats?.gold?.[1] ?? 0)}</td>
+              <td>${Number(stats?.gold?.[2] ?? 0)}</td>
+              <td>${Number(stats?.gold?.[3] ?? 0)}</td>
             </tr>
           </tbody>
         </table>
