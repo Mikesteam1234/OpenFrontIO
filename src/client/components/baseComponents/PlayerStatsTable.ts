@@ -35,25 +35,6 @@ export class PlayerStatsTable extends LitElement {
 
   @property({ type: Object }) stats: PlayerStats;
 
-  private getBuildingName(key: string): string {
-    const names: Record<string, string> = {
-      // buildings
-      city: "City",
-      port: "Port",
-      defp: "Defense",
-      saml: "SAM",
-      silo: "Missile Silo",
-      // boats
-      trade: "Trade Ship",
-      trans: "Transport Ship",
-      wshp: "Warship",
-      // bombs
-      abomb: "Atom Bomb",
-      hbomb: "Hydrogen Bomb",
-      mirv: "MIRV",
-    };
-    return names[key] ?? key;
-  }
 
   render() {
     const stats = this.stats;
