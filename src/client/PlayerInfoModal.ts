@@ -226,8 +226,7 @@ export class PlayerInfoModal extends LitElement {
     const wins = visTotals?.wins ?? 0;
     const losses = visTotals?.losses ?? 0;
     const gamesPlayed = visTotals?.total ?? 0;
-    const winRate =
-      gamesPlayed === 0 ? "0.0" : ((wins / gamesPlayed) * 100).toFixed(1) + "%";
+    const wlr = wins === 0 ? 0 : losses === 0 ? wins : wins / losses;
     const lastActive = this.recentGames.length
       ? new Date(
           Math.max(...this.recentGames.map((g) => Date.parse(g.start))),
