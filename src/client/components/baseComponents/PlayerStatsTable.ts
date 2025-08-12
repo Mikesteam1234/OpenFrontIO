@@ -1,7 +1,7 @@
 import { css, html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { PlayerStats } from "../../../core/StatsSchemas";
-import { translateText } from "../../Utils";
+import { renderNumber, translateText } from "../../Utils";
 
 @customElement("player-stats-table")
 export class PlayerStatsTable extends LitElement {
@@ -65,10 +65,10 @@ export class PlayerStatsTable extends LitElement {
               return html`
                 <tr>
                   <td>${translateText(`something.${key}`)}</td>
-                  <td>${built}</td>
-                  <td>${destroyed}</td>
-                  <td>${captured}</td>
-                  <td>${lost}</td>
+                  <td>${renderNumber(built)}</td>
+                  <td>${renderNumber(destroyed)}</td>
+                  <td>${renderNumber(captured)}</td>
+                  <td>${renderNumber(lost)}</td>
                 </tr>
               `;
             })}
@@ -95,9 +95,9 @@ export class PlayerStatsTable extends LitElement {
               return html`
                 <tr>
                   <td>${translateText(`something.${key}`)}</td>
-                  <td>${sent}</td>
-                  <td>${destroyed}</td>
-                  <td>${arrived}</td>
+                  <td>${renderNumber(sent)}</td>
+                  <td>${renderNumber(destroyed)}</td>
+                  <td>${renderNumber(arrived)}</td>
                 </tr>
               `;
             })}
@@ -124,9 +124,9 @@ export class PlayerStatsTable extends LitElement {
               return html`
                 <tr>
                   <td>${translateText(`something.${bomb}`)}</td>
-                  <td class="text-center">${launched}</td>
-                  <td class="text-center">${landed}</td>
-                  <td class="text-center">${intercepted}</td>
+                  <td class="text-center">${renderNumber(launched)}</td>
+                  <td class="text-center">${renderNumber(landed)}</td>
+                  <td class="text-center">${renderNumber(intercepted)}</td>
                 </tr>
               `;
             })}
@@ -148,9 +148,9 @@ export class PlayerStatsTable extends LitElement {
           <tbody>
             <tr>
               <td>Count</td>
-              <td>${stats?.attacks?.[0] ?? 0n}</td>
-              <td>${stats?.attacks?.[1] ?? 0n}</td>
-              <td>${stats?.attacks?.[2] ?? 0n}</td>
+              <td>${renderNumber(stats?.attacks?.[0] ?? 0n)}</td>
+              <td>${renderNumber(stats?.attacks?.[1] ?? 0n)}</td>
+              <td>${renderNumber(stats?.attacks?.[2] ?? 0n)}</td>
             </tr>
           </tbody>
         </table>
@@ -167,10 +167,10 @@ export class PlayerStatsTable extends LitElement {
           <tbody>
             <tr>
               <td>Count</td>
-              <td>${stats?.gold?.[0] ?? 0n}</td>
-              <td>${stats?.gold?.[1] ?? 0n}</td>
-              <td>${stats?.gold?.[2] ?? 0n}</td>
-              <td>${stats?.gold?.[3] ?? 0n}</td>
+              <td>${renderNumber(stats?.gold?.[0] ?? 0n)}</td>
+              <td>${renderNumber(stats?.gold?.[1] ?? 0n)}</td>
+              <td>${renderNumber(stats?.gold?.[2] ?? 0n)}</td>
+              <td>${renderNumber(stats?.gold?.[3] ?? 0n)}</td>
             </tr>
           </tbody>
         </table>
