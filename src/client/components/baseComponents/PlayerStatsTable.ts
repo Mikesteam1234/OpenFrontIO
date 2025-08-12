@@ -77,10 +77,10 @@ export class PlayerStatsTable extends LitElement {
           </thead>
           <tbody>
             ${buildingKeys.map((key) => {
-              const built = Number(stats?.units?.[key]?.[0] ?? 0);
-              const destroyed = Number(stats?.units?.[key]?.[1] ?? 0);
-              const captured = Number(stats?.units?.[key]?.[2] ?? 0);
-              const lost = Number(stats?.units?.[key]?.[3] ?? 0);
+              const built = stats?.units?.[key]?.[0] ?? 0n;
+              const destroyed = stats?.units?.[key]?.[1] ?? 0n;
+              const captured = stats?.units?.[key]?.[2] ?? 0n;
+              const lost = stats?.units?.[key]?.[3] ?? 0n;
               return html`
                 <tr>
                   <td>${this.getBuildingName(key)}</td>
@@ -108,9 +108,9 @@ export class PlayerStatsTable extends LitElement {
           </thead>
           <tbody>
             ${boatKeys.map((key) => {
-              const sent = Number(stats?.boats?.[key]?.[0] ?? 0);
-              const arrived = Number(stats?.boats?.[key]?.[1] ?? 0);
-              const destroyed = Number(stats?.boats?.[key]?.[3] ?? 0);
+              const sent = stats?.boats?.[key]?.[0] ?? 0n;
+              const arrived = stats?.boats?.[key]?.[1] ?? 0n;
+              const destroyed = stats?.boats?.[key]?.[3] ?? 0n;
               return html`
                 <tr>
                   <td>${this.getBuildingName(key)}</td>
@@ -137,9 +137,9 @@ export class PlayerStatsTable extends LitElement {
           </thead>
           <tbody>
             ${bombKeys.map((bomb) => {
-              const launched = Number(stats?.bombs?.[bomb]?.[0] ?? 0);
-              const landed = Number(stats?.bombs?.[bomb]?.[1] ?? 0);
-              const intercepted = Number(stats?.bombs?.[bomb]?.[2] ?? 0);
+              const launched = stats?.bombs?.[bomb]?.[0] ?? 0n;
+              const landed = stats?.bombs?.[bomb]?.[1] ?? 0n;
+              const intercepted = stats?.bombs?.[bomb]?.[2] ?? 0n;
               return html`
                 <tr>
                   <td>${this.getBuildingName(bomb)}</td>
@@ -167,9 +167,9 @@ export class PlayerStatsTable extends LitElement {
           <tbody>
             <tr>
               <td>Count</td>
-              <td>${Number(stats?.attacks?.[0] ?? 0)}</td>
-              <td>${Number(stats?.attacks?.[1] ?? 0)}</td>
-              <td>${Number(stats?.attacks?.[2] ?? 0)}</td>
+              <td>${stats?.attacks?.[0] ?? 0n}</td>
+              <td>${stats?.attacks?.[1] ?? 0n}</td>
+              <td>${stats?.attacks?.[2] ?? 0n}</td>
             </tr>
           </tbody>
         </table>
@@ -186,10 +186,10 @@ export class PlayerStatsTable extends LitElement {
           <tbody>
             <tr>
               <td>Count</td>
-              <td>${Number(stats?.gold?.[0] ?? 0)}</td>
-              <td>${Number(stats?.gold?.[1] ?? 0)}</td>
-              <td>${Number(stats?.gold?.[2] ?? 0)}</td>
-              <td>${Number(stats?.gold?.[3] ?? 0)}</td>
+              <td>${stats?.gold?.[0] ?? 0n}</td>
+              <td>${stats?.gold?.[1] ?? 0n}</td>
+              <td>${stats?.gold?.[2] ?? 0n}</td>
+              <td>${stats?.gold?.[3] ?? 0n}</td>
             </tr>
           </tbody>
         </table>
