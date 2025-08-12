@@ -52,7 +52,16 @@ export const UserMeResponseSchema = z.object({
 export type UserMeResponse = z.infer<typeof UserMeResponseSchema>;
 
 export const PlayerIdResponseSchema = z.object({
-  createdAt: z.string(),
+  createdAt: z.iso.datetime(),
+  user: z
+    .object({
+      id: z.string(),
+      avatar: z.string().nullable(),
+      username: z.string(),
+      global_name: z.string().nullable(),
+      discriminator: z.string(),
+    })
+    .optional(),
   games: z.array(
     z.object({
       gameId: z.string(),
