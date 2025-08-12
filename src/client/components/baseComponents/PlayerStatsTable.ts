@@ -83,7 +83,7 @@ export class PlayerStatsTable extends LitElement {
               const lost = stats?.units?.[key]?.[3] ?? 0n;
               return html`
                 <tr>
-                  <td>${this.getBuildingName(key)}</td>
+                  <td>${translateText(`something.${key}`)</td>
                   <td>${built}</td>
                   <td>${destroyed}</td>
                   <td>${captured}</td>
