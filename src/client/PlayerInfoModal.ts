@@ -202,12 +202,21 @@ export class PlayerInfoModal extends LitElement {
 
     const visTotals =
       this.visibility === GameType.Public
-        ? (this._publicTotalsCache ?? { wins: 0, losses: 0, total: 0 })
-        : (this._privateTotalsCache ?? { wins: 0, losses: 0, total: 0 });
-    const wins = visTotals.wins;
-    const losses = visTotals.losses;
-    const gamesPlayed = visTotals.total;
-    const wlr = wins === 0 ? 0 : losses === 0 ? wins : wins / losses;
+        ? (this._publicTotalsCache ?? { wins: 0n, losses: 0n, total: 0n })
+        : (this._privateTotalsCache ?? { wins: 0n, losses: 0n, total: 0n });
+    const wins = visTotals.wins ?? 0n;
+    const losses = visTotals.losses ?? 0n;
+    const gamesPlayed = visTotals.total ?? 0n;
+    let wlr: string | number = 0;
+    if (typeof wins === "bigint" || typeof losses === "bigint") {
+      if (losses === 0n) {
+        wlr = wins.toString();
+      } else {
+        wlr = Number(wins) / Number(losses);
+      }
+    } else {
+      wlr = losses === 0 ? wins : wins / losses;
+    }
     const lastActive = this.recentGames.length
       ? new Date(
         Math.max(...this.recentGames.map((g) => Date.parse(g.start))),
