@@ -186,25 +186,6 @@ export class PlayerInfoModal extends LitElement {
     this.requestUpdate();
   }
 
-  private mergePlayerStats(a: PlayerStats, b: PlayerStats): PlayerStats {
-    const safeA = a ?? {};
-    const safeB = b ?? {};
-    const mergeArrays = (arr1?: any[], arr2?: any[]) => {
-      if (!arr1 && !arr2) return undefined;
-      if (!arr1) return arr2;
-      if (!arr2) return arr1;
-      return arr1.map((v, i) => Number(v ?? 0) + Number(arr2[i] ?? 0));
-    };
-    return {
-      attacks: mergeArrays(safeA.attacks, safeB.attacks),
-      betrayals: (safeA.betrayals ?? 0n) + (safeB.betrayals ?? 0n),
-      boats: { ...(safeA.boats ?? {}), ...(safeB.boats ?? {}) },
-      bombs: { ...(safeA.bombs ?? {}), ...(safeB.bombs ?? {}) },
-      gold: mergeArrays(safeA.gold, safeB.gold),
-      units: { ...(safeA.units ?? {}), ...(safeB.units ?? {}) },
-    };
-  }
-
   render() {
     const flag = this.getStoredFlag();
     const playerName = this.getStoredName();
