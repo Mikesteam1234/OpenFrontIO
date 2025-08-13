@@ -14,7 +14,7 @@ export class PlayerInfoModal extends LitElement {
   };
 
   @state() private userMeResponse: UserMeResponse | null = null;
-  @state() private visibility: "all" | "public" | "private" = "all";
+  @state() private visibility: GameType = GameType.Public;
   @state() private expandedGameId: string | null = null;
 
   private statsPublic: PlayerStats | null = null;
