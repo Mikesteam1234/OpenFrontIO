@@ -1,6 +1,11 @@
 import { css, html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { PlayerStats } from "../../../core/StatsSchemas";
+import {
+  BoatKeys,
+  BombKeys,
+  BuildingKeys,
+  PlayerStats,
+} from "../../../core/StatsSchemas";
 import { renderNumber, translateText } from "../../Utils";
 
 @customElement("player-stats-table")
@@ -39,10 +44,6 @@ export class PlayerStatsTable extends LitElement {
   render() {
     const stats = this.stats;
 
-    const buildingKeys = ["city", "port", "defp", "saml", "silo"];
-    const boatKeys = ["trade", "trans", "wshp"];
-    const bombKeys = ["abomb", "hbomb", "mirv"];
-
     return html`
       <div class="table-container">
         <div class="section-title">🏗️ Building Statistics</div>
@@ -57,7 +58,7 @@ export class PlayerStatsTable extends LitElement {
             </tr>
           </thead>
           <tbody>
-            ${buildingKeys.map((key) => {
+            ${BuildingKeys.map((key) => {
               const built = stats?.units?.[key]?.[0] ?? 0n;
               const destroyed = stats?.units?.[key]?.[1] ?? 0n;
               const captured = stats?.units?.[key]?.[2] ?? 0n;
@@ -88,7 +89,7 @@ export class PlayerStatsTable extends LitElement {
             </tr>
           </thead>
           <tbody>
-            ${boatKeys.map((key) => {
+            ${BoatKeys.map((key) => {
               const sent = stats?.boats?.[key]?.[0] ?? 0n;
               const arrived = stats?.boats?.[key]?.[1] ?? 0n;
               const destroyed = stats?.boats?.[key]?.[3] ?? 0n;
@@ -117,7 +118,7 @@ export class PlayerStatsTable extends LitElement {
             </tr>
           </thead>
           <tbody>
-            ${bombKeys.map((bomb) => {
+            ${BombKeys.map((bomb) => {
               const launched = stats?.bombs?.[bomb]?.[0] ?? 0n;
               const landed = stats?.bombs?.[bomb]?.[1] ?? 0n;
               const intercepted = stats?.bombs?.[bomb]?.[2] ?? 0n;

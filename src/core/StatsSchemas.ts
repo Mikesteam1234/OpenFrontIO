@@ -108,3 +108,7 @@ export const PlayerStatsSchema = z
   })
   .optional();
 export type PlayerStats = z.infer<typeof PlayerStatsSchema>;
+
+export const BuildingKeys = ["city", "port", "defp", "saml", "silo"] as const;
+export const BoatKeys = ["trade", "trans", "wshp"] as const;
+export const BombKeys = ["abomb", "hbomb", "mirv"] as const;
