@@ -144,9 +144,9 @@ export class PlayerInfoModal extends LitElement {
             }
           }
 
-          const wins = Number((diffNode as any).wins ?? 0);
-          const losses = Number((diffNode as any).losses ?? 0);
-          const total = Number((diffNode as any).total ?? 0);
+          const wins = Number((diffNode).wins ?? 0);
+          const losses = Number((diffNode).losses ?? 0);
+          const total = Number((diffNode).total ?? 0);
           if (vis === "public") {
             publicTotals.wins += wins;
             publicTotals.losses += losses;
@@ -210,8 +210,8 @@ export class PlayerInfoModal extends LitElement {
     const wlr = wins === 0 ? 0 : losses === 0 ? wins : wins / losses;
     const lastActive = this.recentGames.length
       ? new Date(
-          Math.max(...this.recentGames.map((g) => Date.parse(g.start))),
-        ).toLocaleDateString()
+        Math.max(...this.recentGames.map((g) => Date.parse(g.start))),
+      ).toLocaleDateString()
       : translateText("player_modal.na");
     const playTimeText = translateText("player_modal.na");
 
@@ -363,8 +363,8 @@ export class PlayerInfoModal extends LitElement {
                         ? "200px"
                         : "0"};
                              ${this.expandedGameId === game.gameId
-                        ? ""
-                        : "padding-top:0;padding-bottom:0;"}"
+                                ? ""
+                                : "padding-top:0;padding-bottom:0;"}"
                     >
                       <div>
                         <span class="font-semibold"
