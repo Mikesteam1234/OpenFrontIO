@@ -2,6 +2,7 @@ import { html, LitElement } from "lit";
 import { customElement, query, state } from "lit/decorators.js";
 import { PlayerIdResponseSchema, UserMeResponse } from "../core/ApiSchemas";
 import { getServerConfigFromClient } from "../core/configuration/ConfigLoader";
+import { GameType } from "../core/game/Game";
 import { PlayerStats, PlayerStatsSchema } from "../core/StatsSchemas";
 import "./components/baseComponents/PlayerStatsGrid";
 import "./components/baseComponents/PlayerStatsTable";
@@ -106,16 +107,16 @@ export class PlayerInfoModal extends LitElement {
 
   private getDisplayedStats(): PlayerStats | null {
     switch (this.visibility) {
-      case "public":
+      case GameType.Public:
         return this.statsPublic;
-      case "private":
+      case GameType.Private:
         return this.statsPrivate;
       default:
         return this.statsAll;
     }
   }
 
-  private setVisibility(v: "all" | "public" | "private") {
+  private setVisibility(v: GameType.Public | GameType.Private) {
     this.visibility = v;
     this.requestUpdate();
   }
@@ -186,6 +187,25 @@ export class PlayerInfoModal extends LitElement {
     this.requestUpdate();
   }
 
+  private mergePlayerStats(a: PlayerStats, b: PlayerStats): PlayerStats {
+    const safeA = a ?? {};
+    const safeB = b ?? {};
+    const mergeArrays = (arr1?: any[], arr2?: any[]) => {
+      if (!arr1 && !arr2) return undefined;
+      if (!arr1) return arr2;
+      if (!arr2) return arr1;
+      return arr1.map((v, i) => Number(v ?? 0) + Number(arr2[i] ?? 0));
+    };
+    return {
+      attacks: mergeArrays(safeA.attacks, safeB.attacks),
+      betrayals: (safeA.betrayals ?? 0n) + (safeB.betrayals ?? 0n),
+      boats: { ...(safeA.boats ?? {}), ...(safeB.boats ?? {}) },
+      bombs: { ...(safeA.bombs ?? {}), ...(safeB.bombs ?? {}) },
+      gold: mergeArrays(safeA.gold, safeB.gold),
+      units: { ...(safeA.units ?? {}), ...(safeB.units ?? {}) },
+    };
+  }
+
   render() {
     const flag = this.getStoredFlag();
     const playerName = this.getStoredName();
@@ -246,28 +266,19 @@ export class PlayerInfoModal extends LitElement {
           <div class="flex gap-2 mt-2">
             <button
               class="text-xs px-2 py-0.5 rounded border ${this.visibility ===
-              "all"
+              GameType.Public
                 ? "border-white/60 text-white"
                 : "border-white/20 text-gray-300"}"
-              @click=${() => this.setVisibility("all")}
-            >
-              All
-            </button>
-            <button
-              class="text-xs px-2 py-0.5 rounded border ${this.visibility ===
-              "public"
-                ? "border-white/60 text-white"
-                : "border-white/20 text-gray-300"}"
-              @click=${() => this.setVisibility("public")}
+              @click=${() => this.setVisibility(GameType.Public)}
             >
               Public
             </button>
             <button
               class="text-xs px-2 py-0.5 rounded border ${this.visibility ===
-              "private"
+              GameType.Private
                 ? "border-white/60 text-white"
                 : "border-white/20 text-gray-300"}"
-              @click=${() => this.setVisibility("private")}
+              @click=${() => this.setVisibility(GameType.Private)}
             >
               Private
             </button>
