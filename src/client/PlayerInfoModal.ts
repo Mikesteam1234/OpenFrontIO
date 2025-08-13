@@ -20,7 +20,6 @@ export class PlayerInfoModal extends LitElement {
 
   private statsPublic: PlayerStats | null = null;
   private statsPrivate: PlayerStats | null = null;
-  private statsAll: PlayerStats | null = null;
 
   private _publicTotalsCache: {
     wins: number;
@@ -43,24 +42,6 @@ export class PlayerInfoModal extends LitElement {
     teamCount?: number;
     teamColor?: string;
   }[] = [];
-
-  private computeTotalsByVisibility(): Record<
-    "all" | "public" | "private",
-    { wins: number; losses: number; total: number }
-  > {
-    const zero = { wins: 0, losses: 0, total: 0 };
-    const pub = this._publicTotalsCache ?? zero;
-    const prv = this._privateTotalsCache ?? zero;
-    return {
-      all: {
-        wins: pub.wins + prv.wins,
-        losses: pub.losses + prv.losses,
-        total: pub.total + prv.total,
-      },
-      public: { ...pub },
-      private: { ...prv },
-    };
-  }
 
   private viewGame(gameId: string): void {
     this.close();
@@ -112,7 +93,7 @@ export class PlayerInfoModal extends LitElement {
       case GameType.Private:
         return this.statsPrivate;
       default:
-        return this.statsAll;
+        return null;
     }
   }
 
@@ -218,11 +199,13 @@ export class PlayerInfoModal extends LitElement {
         ? `https://cdn.discordapp.com/embed/avatars/${Number(u.discriminator) % 5}.png`
         : "";
 
-    const totalsByVisibility = this.computeTotalsByVisibility();
-    const visTotals = totalsByVisibility[this.visibility];
-    const wins = visTotals?.wins ?? 0;
-    const losses = visTotals?.losses ?? 0;
-    const gamesPlayed = visTotals?.total ?? 0;
+    const visTotals =
+      this.visibility === GameType.Public
+        ? (this._publicTotalsCache ?? { wins: 0, losses: 0, total: 0 })
+        : (this._privateTotalsCache ?? { wins: 0, losses: 0, total: 0 });
+    const wins = visTotals.wins;
+    const losses = visTotals.losses;
+    const gamesPlayed = visTotals.total;
     const wlr = wins === 0 ? 0 : losses === 0 ? wins : wins / losses;
     const lastActive = this.recentGames.length
       ? new Date(
