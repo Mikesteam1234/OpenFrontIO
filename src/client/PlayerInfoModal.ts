@@ -179,10 +179,6 @@ export class PlayerInfoModal extends LitElement {
 
     this.statsPublic = pubStatsAgg;
     this.statsPrivate = prvStatsAgg;
-    this.statsAll =
-      this.statsPublic && this.statsPrivate
-        ? this.mergePlayerStats(this.statsPublic, this.statsPrivate)
-        : (this.statsPublic ?? this.statsPrivate);
 
     this._publicTotalsCache = { ...publicTotals };
     this._privateTotalsCache = { ...privateTotals };
