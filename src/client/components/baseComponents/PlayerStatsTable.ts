@@ -46,15 +46,19 @@ export class PlayerStatsTable extends LitElement {
 
     return html`
       <div class="table-container">
-        <div class="section-title">🏗️ Building Statistics</div>
+        <div class="section-title">
+          ${translateText("player_stats_table.building_stats")}
+        </div>
         <table>
           <thead>
             <tr>
-              <th class="text-left">Building</th>
-              <th>Built</th>
-              <th>Destroyed</th>
-              <th>Captured</th>
-              <th>Lost</th>
+              <th class="text-left">
+                ${translateText("player_stats_table.building")}
+              </th>
+              <th>${translateText("player_stats_table.built")}</th>
+              <th>${translateText("player_stats_table.destroyed")}</th>
+              <th>${translateText("player_stats_table.captured")}</th>
+              <th>${translateText("player_stats_table.lost")}</th>
             </tr>
           </thead>
           <tbody>
@@ -65,7 +69,7 @@ export class PlayerStatsTable extends LitElement {
               const lost = stats?.units?.[key]?.[3] ?? 0n;
               return html`
                 <tr>
-                  <td>${translateText(`something.${key}`)}</td>
+                  <td>${translateText(`player_stats_table.unit.${key}`)}</td>
                   <td>${renderNumber(built)}</td>
                   <td>${renderNumber(destroyed)}</td>
                   <td>${renderNumber(captured)}</td>
@@ -78,14 +82,18 @@ export class PlayerStatsTable extends LitElement {
       </div>
 
       <div class="table-container">
-        <div class="section-title">🚢 Ship Arrivals</div>
+        <div class="section-title">
+          ${translateText("player_stats_table.ship_arrivals")}
+        </div>
         <table>
           <thead>
             <tr>
-              <th class="text-left">Ship Type</th>
-              <th>Sent</th>
-              <th>Destroyed</th>
-              <th>Arrived</th>
+              <th class="text-left">
+                ${translateText("player_stats_table.ship_type")}
+              </th>
+              <th>${translateText("player_stats_table.sent")}</th>
+              <th>${translateText("player_stats_table.destroyed")}</th>
+              <th>${translateText("player_stats_table.arrived")}</th>
             </tr>
           </thead>
           <tbody>
@@ -95,7 +103,7 @@ export class PlayerStatsTable extends LitElement {
               const destroyed = stats?.boats?.[key]?.[3] ?? 0n;
               return html`
                 <tr>
-                  <td>${translateText(`something.${key}`)}</td>
+                  <td>${translateText(`player_stats_table.unit.${key}`)}</td>
                   <td>${renderNumber(sent)}</td>
                   <td>${renderNumber(destroyed)}</td>
                   <td>${renderNumber(arrived)}</td>
@@ -107,14 +115,24 @@ export class PlayerStatsTable extends LitElement {
       </div>
 
       <div class="table-container">
-        <div class="section-title">☢️ Nuke Statistics</div>
+        <div class="section-title">
+          ${translateText("player_stats_table.nuke_stats")}
+        </div>
         <table>
           <thead>
             <tr>
-              <th class="text-left" style="width:40%">Weapon</th>
-              <th class="text-center" style="width:20%">Built</th>
-              <th class="text-center" style="width:20%">Destroyed</th>
-              <th class="text-center" style="width:20%">Hits</th>
+              <th class="text-left" style="width:40%">
+                ${translateText("player_stats_table.weapon")}
+              </th>
+              <th class="text-center" style="width:20%">
+                ${translateText("player_stats_table.built")}
+              </th>
+              <th class="text-center" style="width:20%">
+                ${translateText("player_stats_table.destroyed")}
+              </th>
+              <th class="text-center" style="width:20%">
+                ${translateText("player_stats_table.hits")}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -124,7 +142,7 @@ export class PlayerStatsTable extends LitElement {
               const intercepted = stats?.bombs?.[bomb]?.[2] ?? 0n;
               return html`
                 <tr>
-                  <td>${translateText(`something.${bomb}`)}</td>
+                  <td>${translateText(`player_stats_table.unit.${bomb}`)}</td>
                   <td class="text-center">${renderNumber(launched)}</td>
                   <td class="text-center">${renderNumber(landed)}</td>
                   <td class="text-center">${renderNumber(intercepted)}</td>
@@ -136,19 +154,21 @@ export class PlayerStatsTable extends LitElement {
       </div>
 
       <div class="table-container">
-        <div class="section-title">📊 Player Metrics</div>
+        <div class="section-title">
+          ${translateText("player_stats_table.player_metrics")}
+        </div>
         <table>
           <thead>
             <tr>
-              <th>attack</th>
-              <th>sent</th>
-              <th>received</th>
-              <th>cancelled</th>
+              <th>${translateText("player_stats_table.attack")}</th>
+              <th>${translateText("player_stats_table.sent")}</th>
+              <th>${translateText("player_stats_table.received")}</th>
+              <th>${translateText("player_stats_table.cancelled")}</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Count</td>
+              <td>${translateText("player_stats_table.count")}</td>
               <td>${renderNumber(stats?.attacks?.[0] ?? 0n)}</td>
               <td>${renderNumber(stats?.attacks?.[1] ?? 0n)}</td>
               <td>${renderNumber(stats?.attacks?.[2] ?? 0n)}</td>
@@ -158,16 +178,16 @@ export class PlayerStatsTable extends LitElement {
         <table style="margin-top: 0.75rem;">
           <thead>
             <tr>
-              <th>gold</th>
-              <th>workers</th>
-              <th>war</th>
-              <th>trade</th>
-              <th>steal</th>
+              <th>${translateText("player_stats_table.gold")}</th>
+              <th>${translateText("player_stats_table.workers")}</th>
+              <th>${translateText("player_stats_table.war")}</th>
+              <th>${translateText("player_stats_table.trade")}</th>
+              <th>${translateText("player_stats_table.steal")}</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Count</td>
+              <td>${translateText("player_stats_table.count")}</td>
               <td>${renderNumber(stats?.gold?.[0] ?? 0n)}</td>
               <td>${renderNumber(stats?.gold?.[1] ?? 0n)}</td>
               <td>${renderNumber(stats?.gold?.[2] ?? 0n)}</td>

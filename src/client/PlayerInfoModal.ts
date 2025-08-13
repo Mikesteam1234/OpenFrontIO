@@ -1,5 +1,6 @@
 import { html, LitElement } from "lit";
 import { customElement, query, state } from "lit/decorators.js";
+import { translateText } from "../client/Utils";
 import { PlayerIdResponseSchema, UserMeResponse } from "../core/ApiSchemas";
 import { getServerConfigFromClient } from "../core/configuration/ConfigLoader";
 import { GameType } from "../core/game/Game";
@@ -211,11 +212,15 @@ export class PlayerInfoModal extends LitElement {
       ? new Date(
           Math.max(...this.recentGames.map((g) => Date.parse(g.start))),
         ).toLocaleDateString()
-      : "N/A";
-    const playTimeText = "N/A";
+      : translateText("player_modal.na");
+    const playTimeText = translateText("player_modal.na");
 
     return html`
-      <o-modal id="playerInfoModal" title="Player Info" alwaysMaximized>
+      <o-modal
+        id="playerInfoModal"
+        title="${translateText("player_modal.title")}"
+        alwaysMaximized
+      >
         <div class="flex flex-col items-center mt-2 mb-4">
           <br />
           <div class="flex items-center gap-2">
@@ -223,7 +228,7 @@ export class PlayerInfoModal extends LitElement {
               <img
                 class="size-[48px] rounded-full block"
                 src="/flags/${flag ?? "xx"}.svg"
-                alt="Flag"
+                alt="${translateText("player_modal.flag_alt")}"
               />
             </div>
 
@@ -239,7 +244,7 @@ export class PlayerInfoModal extends LitElement {
                     <img
                       class="size-[48px] rounded-full block"
                       src="${avatarUrl}"
-                      alt="Avatar"
+                      alt="${translateText("player_modal.avatar_alt")}"
                     />
                   </div>
                 `
@@ -254,7 +259,7 @@ export class PlayerInfoModal extends LitElement {
                 : "border-white/20 text-gray-300"}"
               @click=${() => this.setVisibility(GameType.Public)}
             >
-              Public
+              ${translateText("player_modal.public")}
             </button>
             <button
               class="text-xs px-2 py-0.5 rounded border ${this.visibility ===
@@ -263,7 +268,7 @@ export class PlayerInfoModal extends LitElement {
                 : "border-white/20 text-gray-300"}"
               @click=${() => this.setVisibility(GameType.Private)}
             >
-              Private
+              ${translateText("player_modal.private")}
             </button>
           </div>
 
@@ -271,12 +276,12 @@ export class PlayerInfoModal extends LitElement {
 
           <player-stats-grid
             .titles=${[
-              "Wins",
-              "Losses",
-              "Win:Loss Ratio",
-              "Games Played",
-              "Play Time",
-              "Last Active",
+              translateText("player_modal.stats_wins"),
+              translateText("player_modal.stats_losses"),
+              translateText("player_modal.stats_wlr"),
+              translateText("player_modal.stats_games_played"),
+              translateText("player_modal.stats_play_time"),
+              translateText("player_modal.stats_last_active"),
             ]}
             .values=${[
               wins,
@@ -302,7 +307,7 @@ export class PlayerInfoModal extends LitElement {
 
           <div class="mt-4 w-full max-w-md">
             <div class="text-sm text-gray-400 font-semibold mb-1">
-              🎮 Recent Games
+              🎮 ${translateText("player_modal.recent_games")}
             </div>
             <div class="flex flex-col gap-2">
               ${this.recentGames.map(
@@ -314,18 +319,24 @@ export class PlayerInfoModal extends LitElement {
                     <div class="flex items-center justify-between px-4 py-2">
                       <div>
                         <div class="text-sm font-semibold text-white">
-                          Game ID: ${game.gameId}
+                          ${translateText("player_modal.game_id")}:
+                          ${game.gameId}
                         </div>
                         <div class="text-xs text-gray-400">
-                          Mode:
+                          ${translateText("player_modal.mode")}:
                           ${game.gameMode === "ffa"
-                            ? "Free-for-All"
-                            : html`Team (${game.teamCount} teams)`}
+                            ? translateText("player_modal.mode_ffa")
+                            : html`${translateText("player_modal.mode_team")}
+                              (${game.teamCount}
+                              ${translateText("player_modal.teams")})`}
                         </div>
                         ${game.gameMode === "team" && game.teamColor
                           ? html`
                               <div class="text-white text-xs font-semibold">
-                                Player Team Color: ${game.teamColor}
+                                ${translateText(
+                                  "player_modal.player_team_color",
+                                )}:
+                                ${game.teamColor}
                               </div>
                             `
                           : null}
@@ -335,13 +346,13 @@ export class PlayerInfoModal extends LitElement {
                           class="text-sm text-gray-300 bg-gray-700 px-3 py-1 rounded"
                           @click=${() => this.viewGame(game.gameId)}
                         >
-                          View
+                          ${translateText("player_modal.view")}
                         </button>
                         <button
                           class="text-sm text-gray-300 bg-gray-600 px-3 py-1 rounded"
                           @click=${() => this.toggleGameDetails(game.gameId)}
                         >
-                          Details
+                          ${translateText("player_modal.details")}
                         </button>
                       </div>
                     </div>
@@ -356,25 +367,36 @@ export class PlayerInfoModal extends LitElement {
                         : "padding-top:0;padding-bottom:0;"}"
                     >
                       <div>
-                        <span class="font-semibold">Started:</span> ${new Date(
-                          game.start,
-                        ).toLocaleString()}
+                        <span class="font-semibold"
+                          >${translateText("player_modal.started")}:</span
+                        >
+                        ${new Date(game.start).toLocaleString()}
                       </div>
                       <div>
-                        <span class="font-semibold">Mode:</span>
+                        <span class="font-semibold"
+                          >${translateText("player_modal.mode")}:</span
+                        >
                         ${game.gameMode === "ffa"
-                          ? "Free-for-All"
-                          : `Team (${game.teamCount ?? "?"} teams)`}
+                          ? translateText("player_modal.mode_ffa")
+                          : `${translateText("player_modal.mode_team")} (${game.teamCount ?? "?"} ${translateText("player_modal.teams")})`}
                       </div>
                       <div>
-                        <span class="font-semibold">Map:</span> ${game.map}
+                        <span class="font-semibold"
+                          >${translateText("player_modal.map")}:</span
+                        >
+                        ${game.map}
                       </div>
                       <div>
-                        <span class="font-semibold">Difficulty:</span>
+                        <span class="font-semibold"
+                          >${translateText("player_modal.difficulty")}:</span
+                        >
                         ${game.difficulty}
                       </div>
                       <div>
-                        <span class="font-semibold">Type:</span> ${game.type}
+                        <span class="font-semibold"
+                          >${translateText("player_modal.type")}:</span
+                        >
+                        ${game.type}
                       </div>
                     </div>
                   </div>
