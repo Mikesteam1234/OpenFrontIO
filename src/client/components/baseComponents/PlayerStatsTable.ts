@@ -1,11 +1,6 @@
 import { css, html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import {
-  BoatKeys,
-  BombKeys,
-  BuildingKeys,
-  PlayerStats,
-} from "../../../core/StatsSchemas";
+import { boatUnits, bombUnits, otherUnits, PlayerStats } from "../../../core/StatsSchemas";
 import { renderNumber, translateText } from "../../Utils";
 
 @customElement("player-stats-table")
@@ -62,7 +57,7 @@ export class PlayerStatsTable extends LitElement {
             </tr>
           </thead>
           <tbody>
-            ${BuildingKeys.map((key) => {
+            ${otherUnits.map((key) => {
               const built = stats?.units?.[key]?.[0] ?? 0n;
               const destroyed = stats?.units?.[key]?.[1] ?? 0n;
               const captured = stats?.units?.[key]?.[2] ?? 0n;
@@ -97,13 +92,13 @@ export class PlayerStatsTable extends LitElement {
             </tr>
           </thead>
           <tbody>
-            ${BoatKeys.map((key) => {
+            ${boatUnits.map((key) => {
               const sent = stats?.boats?.[key]?.[0] ?? 0n;
               const arrived = stats?.boats?.[key]?.[1] ?? 0n;
               const destroyed = stats?.boats?.[key]?.[3] ?? 0n;
               return html`
                 <tr>
-                  <td>${translateText(`player_stats_table.unit.${key}`)}</td>
+                  <td>${translateText(`player_stats_table.${key}`)}</td>
                   <td>${renderNumber(sent)}</td>
                   <td>${renderNumber(destroyed)}</td>
                   <td>${renderNumber(arrived)}</td>
@@ -136,13 +131,13 @@ export class PlayerStatsTable extends LitElement {
             </tr>
           </thead>
           <tbody>
-            ${BombKeys.map((bomb) => {
+            ${bombUnits.map((bomb) => {
               const launched = stats?.bombs?.[bomb]?.[0] ?? 0n;
               const landed = stats?.bombs?.[bomb]?.[1] ?? 0n;
               const intercepted = stats?.bombs?.[bomb]?.[2] ?? 0n;
               return html`
                 <tr>
-                  <td>${translateText(`player_stats_table.unit.${bomb}`)}</td>
+                  <td>${translateText(`player_stats_table.${bomb}`)}</td>
                   <td class="text-center">${renderNumber(launched)}</td>
                   <td class="text-center">${renderNumber(landed)}</td>
                   <td class="text-center">${renderNumber(intercepted)}</td>
