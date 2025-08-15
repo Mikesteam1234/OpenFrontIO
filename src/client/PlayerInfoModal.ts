@@ -18,6 +18,7 @@ export class PlayerInfoModal extends LitElement {
   @state() private userMeResponse: UserMeResponse | null = null;
   @state() private visibility: GameType = GameType.Public;
   @state() private expandedGameId: string | null = null;
+  @state() private loadError: string | null = null;
 
   private statsPublic: PlayerStats | null = null;
   private statsPrivate: PlayerStats | null = null;
@@ -231,6 +232,12 @@ export class PlayerInfoModal extends LitElement {
         alwaysMaximized
       >
         <div class="flex flex-col items-center mt-2 mb-4">
+          ${this.loadError ? html`
+            <div class="w-full max-w-md mb-3 px-3 py-2 rounded border text-sm text-center"
+                 style="background: rgba(220,38,38,0.15); border-color: rgba(248,113,113,0.6); color: rgb(254,202,202);">
+              ${translateText(this.loadError)}
+            </div>
+          ` : null}
           <br />
           <div class="flex items-center gap-2">
             <div class="p-[3px] rounded-full bg-gray-500">
@@ -419,6 +426,7 @@ export class PlayerInfoModal extends LitElement {
   }
 
   public open() {
+    this.loadError = null;
     this.requestUpdate();
     this.modalEl?.open();
   }
@@ -442,6 +450,7 @@ export class PlayerInfoModal extends LitElement {
 
   private async loadFromApi(playerId: string): Promise<void> {
     try {
+      this.loadError = null;
       const config = await getServerConfigFromClient();
       const url = new URL(config.jwtIssuer());
       url.pathname = "/player/" + playerId;
@@ -451,7 +460,9 @@ export class PlayerInfoModal extends LitElement {
         cache: "no-store",
       });
       if (!res.ok) {
-        console.error("API error:", res.status, res.statusText);
+        console.warn("API error:", res.status, res.statusText, res);
+        this.loadError = "player_modal.error.load";
+        this.requestUpdate();
         return;
       }
 
@@ -459,7 +470,9 @@ export class PlayerInfoModal extends LitElement {
 
       const parsed = PlayerIdResponseSchema.safeParse(json);
       if (!parsed.success) {
-        console.error("PlayerApiTopSchema validation failed:", parsed.error);
+        console.warn("PlayerApiTopSchema validation failed:", parsed.error, parsed);
+        this.loadError = "player_modal.error.validate";
+        this.requestUpdate();
         return;
       }
 
@@ -481,7 +494,9 @@ export class PlayerInfoModal extends LitElement {
 
       this.requestUpdate();
     } catch (err) {
-      console.error("Failed to load player data from API:", err);
+      console.warn("Failed to load player data from API:", err);
+      this.loadError = "player_modal.error.load";
+      this.requestUpdate();
     }
   }
 }

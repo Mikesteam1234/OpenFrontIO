@@ -631,7 +631,11 @@
     "type": "Type",
     "na": "N/A",
     "flag_alt": "Flag",
-    "avatar_alt": "Avatar"
+    "avatar_alt": "Avatar",
+    "error": {
+      "load": "Failed to load player data.",
+      "validate": "Failed to validate player data from server."
+    }
   },
   "player_stats_table": {
     "building_stats": "Building Statistics",
