@@ -1,12 +1,45 @@
 import { html, LitElement } from "lit";
 import { customElement, query, state } from "lit/decorators.js";
 import { translateText } from "../client/Utils";
-import { PlayerIdResponseSchema, UserMeResponse } from "../core/ApiSchemas";
-import { getServerConfigFromClient } from "../core/configuration/ConfigLoader";
+import { PlayerIdResponseSchema, UserMeResponse, PlayerIdResponse } from "../core/ApiSchemas";
+import { getApiBase, getToken } from "./jwt";
 import { GameType } from "../core/game/Game";
 import { PlayerStats, PlayerStatsSchema } from "../core/StatsSchemas";
 import "./components/baseComponents/PlayerStatsGrid";
 import "./components/baseComponents/PlayerStatsTable";
+
+async function fetchPlayerById(playerId: string): Promise<PlayerIdResponse | false> {
+  try {
+    const base = getApiBase();
+    const token = await getToken();
+    const url = `${base}/player/${encodeURIComponent(playerId)}`;
+
+    const res = await fetch(url, {
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      cache: "no-store",
+    });
+
+    if (res.status !== 200) {
+      console.warn("fetchPlayerById: unexpected status", res.status, res.statusText);
+      return false;
+    }
+
+    const json = await res.json();
+    const parsed = PlayerIdResponseSchema.safeParse(json);
+    if (!parsed.success) {
+      console.warn("fetchPlayerById: Zod validation failed", parsed.error);
+      return false;
+    }
+
+    return parsed.data;
+  } catch (err) {
+    console.warn("fetchPlayerById: request failed", err);
+    return false;
+  }
+}
 
 @customElement("player-info-modal")
 export class PlayerInfoModal extends LitElement {
@@ -451,32 +484,14 @@ export class PlayerInfoModal extends LitElement {
   private async loadFromApi(playerId: string): Promise<void> {
     try {
       this.loadError = null;
-      const config = await getServerConfigFromClient();
-      const url = new URL(config.jwtIssuer());
-      url.pathname = "/player/" + playerId;
 
-      const res = await fetch(url.toString(), {
-        headers: { Accept: "application/json" },
-        cache: "no-store",
-      });
-      if (!res.ok) {
-        console.warn("API error:", res.status, res.statusText, res);
+      const data = await fetchPlayerById(playerId);
+      if (!data) {
+        // If the call failed or validation failed, show a generic load error
         this.loadError = "player_modal.error.load";
         this.requestUpdate();
         return;
       }
-
-      const json = await res.json();
-
-      const parsed = PlayerIdResponseSchema.safeParse(json);
-      if (!parsed.success) {
-        console.warn("PlayerApiTopSchema validation failed:", parsed.error, parsed);
-        this.loadError = "player_modal.error.validate";
-        this.requestUpdate();
-        return;
-      }
-
-      const data = parsed.data;
 
       this.applyBackendStats(data.stats);
 
@@ -486,15 +501,12 @@ export class PlayerInfoModal extends LitElement {
         map: g.map,
         difficulty: g.difficulty,
         type: g.type,
-        gameMode:
-          g.mode && String(g.mode).toLowerCase().includes("team")
-            ? "team"
-            : "ffa",
+        gameMode: g.mode && String(g.mode).toLowerCase().includes("team") ? "team" : "ffa",
       }));
 
       this.requestUpdate();
     } catch (err) {
-      console.warn("Failed to load player data from API:", err);
+      console.warn("Failed to load player data:", err);
       this.loadError = "player_modal.error.load";
       this.requestUpdate();
     }

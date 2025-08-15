@@ -90,6 +90,7 @@ export const PlayerIdResponseSchema = z.object({
     ),
   ),
 });
+export type PlayerIdResponse = z.infer<typeof PlayerIdResponseSchema>;
 
 export const StripeCreateCheckoutSessionResponseSchema = z.object({
   id: z.string(),
