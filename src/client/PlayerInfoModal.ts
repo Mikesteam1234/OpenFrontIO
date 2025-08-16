@@ -467,17 +467,13 @@ export class PlayerInfoModal extends LitElement {
     this.modalEl?.close();
   }
 
-  onUserMe(userMeResponse: UserMeResponse) {
+  onUserMe(userMeResponse: UserMeResponse | null) {
     this.userMeResponse = userMeResponse;
     const playerId = userMeResponse?.player?.publicId;
     if (playerId) {
       this.loadFromApi(playerId);
     }
     this.requestUpdate();
-  }
-
-  onLoggedOut() {
-    this.userMeResponse = null;
   }
 
   private async loadFromApi(playerId: string): Promise<void> {
