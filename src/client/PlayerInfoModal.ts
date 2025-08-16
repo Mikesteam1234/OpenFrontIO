@@ -19,7 +19,6 @@ async function fetchPlayerById(playerId: string): Promise<PlayerIdResponse | fal
         Accept: "application/json",
         Authorization: `Bearer ${token}`,
       },
-      cache: "no-store",
     });
 
     if (res.status !== 200) {
