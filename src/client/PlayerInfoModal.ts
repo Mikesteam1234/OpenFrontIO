@@ -5,8 +5,10 @@ import {
   PlayerIdResponse,
   PlayerIdResponseSchema,
   UserMeResponse,
+  PlayerStatsLeaf,
+  PlayerStatsTree,
 } from "../core/ApiSchemas";
-import { GameType } from "../core/game/Game";
+import { GameType, GameTypeValue, DifficultyType, GameMode, GameModeType, Difficulty } from "../core/game/Game";
 import { PlayerStats } from "../core/StatsSchemas";
 import "./components/baseComponents/PlayerStatsGrid";
 import "./components/baseComponents/PlayerStatsTable";
@@ -58,18 +60,14 @@ export class PlayerInfoModal extends LitElement {
   };
 
   @state() private userMeResponse: UserMeResponse | null = null;
-  @state() private visibility: GameType = GameType.Public;
+  @state() private visibility: GameTypeValue = GameType.Public;
   @state() private expandedGameId: string | null = null;
   @state() private loadError: string | null = null;
-  @state() private selectedMode: "Free For All" | "Team" = "Free For All";
-  @state() private selectedDifficulty:
-    | "Easy"
-    | "Medium"
-    | "Hard"
-    | "Impossible" = "Medium";
+  @state() private selectedMode: GameModeType = GameMode.FFA;
+  @state() private selectedDifficulty: DifficultyType = Difficulty.Medium;
   @state() private warningMessage: string | null = null;
 
-  private statsTree: PlayerIdResponse["stats"] | undefined;
+  private statsTree: PlayerStatsTree | undefined;
 
   private recentGames: {
     gameId: string;
@@ -125,71 +123,60 @@ export class PlayerInfoModal extends LitElement {
     super.disconnectedCallback();
   }
 
-  private getSelectedLeaf(): {
-    wins?: string;
-    losses?: string;
-    total?: string;
-    stats?: PlayerStats;
-  } | null {
-    const typeKey = this.visibility === GameType.Public ? "Public" : "Private";
-    const typeNode = (this.statsTree as any)?.[typeKey];
+  private getSelectedLeaf(): PlayerStatsLeaf | null {
+    const typeKey: GameTypeValue = this.visibility;
+    const typeNode = this.statsTree?.[typeKey];
     if (!typeNode) return null;
-    const modeNode = typeNode?.[this.selectedMode];
+    const modeNode = typeNode[this.selectedMode];
     if (!modeNode) return null;
-    const diffNode = modeNode?.[this.selectedDifficulty];
+    const diffNode = modeNode[this.selectedDifficulty];
     if (!diffNode) return null;
-    return diffNode as any;
+    return diffNode;
   }
 
   private getDisplayedStats(): PlayerStats | null {
     const leaf = this.getSelectedLeaf();
-
     if (!leaf || !leaf.stats) return {} as PlayerStats;
-    return leaf.stats as PlayerStats;
+    return leaf.stats;
   }
 
   private setVisibility(v: GameType.Public | GameType.Private) {
     this.visibility = v;
-    const typeKey = this.visibility === GameType.Public ? "Public" : "Private";
-    const typeNode = (this.statsTree as any)?.[typeKey] || {};
-    const modes = Object.keys(typeNode) as ("Free For All" | "Team")[];
+    const typeKey: GameTypeValue = this.visibility;
+    const typeNode = this.statsTree?.[typeKey] ?? {};
+    const modes = Object.keys(typeNode) as GameModeType[];
     if (modes.length) {
       if (!modes.includes(this.selectedMode)) this.selectedMode = modes[0];
-      const diffs = Object.keys(typeNode[this.selectedMode] || {}) as (
-        | "Easy"
-        | "Medium"
-        | "Hard"
-        | "Impossible"
-      )[];
-      // Keep current selection; warning will handle missing data
+      const selectedModeNode =
+        (typeNode as Partial<
+          Record<GameModeType, Partial<Record<DifficultyType, PlayerStatsLeaf>>>
+        >)[this.selectedMode] ?? {};
+      const _diffs = Object.keys(selectedModeNode) as DifficultyType[];
     }
     this.requestUpdate();
   }
 
-  private setMode(m: "Free For All" | "Team") {
-    // Always reflect selection visually
+  private setMode(m: GameModeType) {
     this.selectedMode = m;
 
-    const typeKey = this.visibility === GameType.Public ? "Public" : "Private";
-    const typeNode = (this.statsTree as any)?.[typeKey];
+    const typeKey: GameTypeValue = this.visibility;
+    const typeNode = this.statsTree?.[typeKey];
 
     if (!typeNode || !typeNode[m]) {
-      // No data for this mode under current type → keep selection, just warn
       this.warningMessage = "player_modal.no_data";
       this.requestUpdate();
       return;
     }
 
-    // Data exists for this mode. Do not auto-change difficulty; just clear warning.
     this.warningMessage = null;
     this.requestUpdate();
   }
 
-  private setDifficulty(d: "Easy" | "Medium" | "Hard" | "Impossible") {
+  private setDifficulty(d: DifficultyType) {
     this.selectedDifficulty = d;
 
-    const typeKey = this.visibility === GameType.Public ? "Public" : "Private";
-    const modeNode = (this.statsTree as any)?.[typeKey]?.[this.selectedMode];
+    const typeKey: GameTypeValue = this.visibility;
+    const modeNode = this.statsTree?.[typeKey]?.[this.selectedMode];
 
     if (!modeNode || !modeNode[d]) {
       this.warningMessage = "player_modal.no_data";
@@ -200,27 +187,22 @@ export class PlayerInfoModal extends LitElement {
     this.requestUpdate();
   }
 
-  private applyBackendStats(rawStats: any): void {
-    // Keep the raw nested structure so we can select per type/mode/difficulty
-    this.statsTree = rawStats ?? undefined;
+  private applyBackendStats(rawStats: PlayerStatsTree): void {
+    this.statsTree = rawStats;
+    const typeKey: GameTypeValue = this.visibility;
+    const typeNode = this.statsTree?.[typeKey] ?? {};
 
-    // Initialize selector defaults to the first available keys under current visibility
-    const typeKey = this.visibility === GameType.Public ? "Public" : "Private";
-    const typeNode = (this.statsTree && (this.statsTree as any)[typeKey]) || {};
-
-    const availableModes = Object.keys(typeNode) as ("Free For All" | "Team")[];
+    const availableModes = Object.keys(typeNode) as GameModeType[];
     if (availableModes.length > 0) {
       this.selectedMode = availableModes.includes(this.selectedMode)
         ? this.selectedMode
         : availableModes[0];
 
-      const modeNode = (typeNode as any)[this.selectedMode] || {};
-      const availableDiffs = Object.keys(modeNode) as (
-        | "Easy"
-        | "Medium"
-        | "Hard"
-        | "Impossible"
-      )[];
+      const modeNode =
+        (typeNode as Partial<
+          Record<GameModeType, Partial<Record<DifficultyType, PlayerStatsLeaf>>>
+        >)[this.selectedMode] ?? {};
+      const availableDiffs = Object.keys(modeNode) as DifficultyType[];
       if (availableDiffs.length > 0) {
         this.selectedDifficulty = availableDiffs.includes(
           this.selectedDifficulty,
@@ -246,14 +228,14 @@ export class PlayerInfoModal extends LitElement {
         : "";
 
     const leaf = this.getSelectedLeaf();
-    const wins = Number((leaf?.wins as any) ?? 0);
-    const losses = Number((leaf?.losses as any) ?? 0);
-    const gamesPlayed = Number((leaf?.total as any) ?? 0);
+    const wins = Number(leaf?.wins ?? 0);
+    const losses = Number(leaf?.losses ?? 0);
+    const gamesPlayed = Number(leaf?.total ?? 0);
     const wlr = losses === 0 ? wins : wins / losses;
     const lastActive = this.recentGames.length
       ? new Date(
-          Math.max(...this.recentGames.map((g) => Date.parse(g.start))),
-        ).toLocaleDateString()
+        Math.max(...this.recentGames.map((g) => Date.parse(g.start))),
+      ).toLocaleDateString()
       : translateText("player_modal.na");
     const playTimeText = translateText("player_modal.na");
 
@@ -336,7 +318,7 @@ export class PlayerInfoModal extends LitElement {
 
           <!-- Mode selector -->
           <div class="flex gap-2 mt-2">
-            ${(["Free For All", "Team"] as const).map(
+            ${([GameMode.FFA, GameMode.Team] as const).map(
               (m) => html`
                 <button
                   class="text-xs px-2 py-0.5 rounded border ${this
@@ -356,7 +338,7 @@ export class PlayerInfoModal extends LitElement {
 
           <!-- Difficulty selector -->
           <div class="flex gap-2 mt-2">
-            ${(["Easy", "Medium", "Hard", "Impossible"] as const).map(
+            ${([Difficulty.Easy, Difficulty.Medium, Difficulty.Hard, Difficulty.Impossible] as const).map(
               (d) => html`
                 <button
                   class="text-xs px-2 py-0.5 rounded border ${this
@@ -463,8 +445,8 @@ export class PlayerInfoModal extends LitElement {
                         ? "200px"
                         : "0"};
                              ${this.expandedGameId === game.gameId
-                        ? ""
-                        : "padding-top:0;padding-bottom:0;"}"
+                                ? ""
+                                : "padding-top:0;padding-bottom:0;"}"
                     >
                       <div>
                         <span class="font-semibold"
@@ -534,7 +516,6 @@ export class PlayerInfoModal extends LitElement {
 
       const data = await fetchPlayerById(playerId);
       if (!data) {
-        // If the call failed or validation failed, show a generic load error
         this.loadError = "player_modal.error.load";
         this.requestUpdate();
         return;

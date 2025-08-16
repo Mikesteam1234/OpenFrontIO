@@ -52,6 +52,26 @@ export const UserMeResponseSchema = z.object({
 });
 export type UserMeResponse = z.infer<typeof UserMeResponseSchema>;
 
+export const PlayerStatsLeafSchema = z.object({
+  wins: BigIntStringSchema,
+  losses: BigIntStringSchema,
+  total: BigIntStringSchema,
+  stats: PlayerStatsSchema,
+});
+export type PlayerStatsLeaf = z.infer<typeof PlayerStatsLeafSchema>;
+
+export const PlayerStatsTreeSchema = z.partialRecord(
+  z.enum(GameType),
+  z.partialRecord(
+    z.enum(GameMode),
+    z.partialRecord(
+      z.enum(Difficulty),
+      PlayerStatsLeafSchema,
+    ),
+  ),
+);
+export type PlayerStatsTree = z.infer<typeof PlayerStatsTreeSchema>;
+
 export const PlayerIdResponseSchema = z.object({
   createdAt: z.iso.datetime(),
   user: z
@@ -74,21 +94,7 @@ export const PlayerIdResponseSchema = z.object({
       clientId: z.string().optional(),
     })
     .array(),
-  stats: z.partialRecord(
-    z.enum(GameType),
-    z.partialRecord(
-      z.enum(GameMode),
-      z.partialRecord(
-        z.enum(Difficulty),
-        z.object({
-          wins: BigIntStringSchema,
-          losses: BigIntStringSchema,
-          total: BigIntStringSchema,
-          stats: PlayerStatsSchema,
-        }),
-      ),
-    ),
-  ),
+  stats: PlayerStatsTreeSchema,
 });
 export type PlayerIdResponse = z.infer<typeof PlayerIdResponseSchema>;
 
