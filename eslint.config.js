@@ -2,10 +2,11 @@ import eslintConfigPrettier from "eslint-config-prettier/flat";
 import globals from "globals";
 import path from "node:path";
 import pluginJs from "@eslint/js";
-import stylisticTs from "@stylistic/eslint-plugin";
+import stylistic from "@stylistic/eslint-plugin";
 import tseslint from "typescript-eslint";
 import { fileURLToPath } from "node:url";
 import { includeIgnoreFile } from "@eslint/compat";
+import eslintPluginLocal from "./eslint-plugin-local/plugin.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,6 +27,8 @@ export default [
         projectService: {
           allowDefaultProject: [
             "__mocks__/fileMock.js",
+            "eslint-plugin-local/plugin.js",
+            "eslint-plugin-local/rules/no-z-array.js",
             "eslint.config.js",
             "jest.config.ts",
             "postcss.config.js",
@@ -40,22 +43,21 @@ export default [
   {
     rules: {
       // Disable rules that would fail. The failures should be fixed, and the entries here removed.
-      "@typescript-eslint/no-explicit-any": "off", // https://github.com/openfrontio/OpenFrontIO/issues/1789
       "@typescript-eslint/no-unused-expressions": "off", // https://github.com/openfrontio/OpenFrontIO/issues/1790
       "no-case-declarations": "off", // https://github.com/openfrontio/OpenFrontIO/issues/1791
     },
   },
   {
     plugins: {
-      "@stylistic/ts": stylisticTs,
+      "@stylistic": stylistic,
     },
     rules: {
       // Enable rules
-      // '@stylistic/ts/quotes': ['error', 'single'], TODO: Enable this rule, https://github.com/openfrontio/OpenFrontIO/issues/1788
-      "@stylistic/ts/indent": ["error", 2],
-      "@stylistic/ts/semi": "error",
-      "@stylistic/ts/space-infix-ops": "error",
-      "@stylistic/ts/type-annotation-spacing": [
+      // '@stylistic/quotes': ['error', 'single'], TODO: Enable this rule, https://github.com/openfrontio/OpenFrontIO/issues/1788
+      "@stylistic/indent": ["error", 2],
+      "@stylistic/semi": "error",
+      "@stylistic/space-infix-ops": "error",
+      "@stylistic/type-annotation-spacing": [
         "error",
         {
           after: true,
@@ -67,11 +69,13 @@ export default [
           },
         },
       ],
+      "@stylistic/eol-last": "error",
       "@typescript-eslint/consistent-type-definitions": [
         "error",
         "type",
       ],
       "@typescript-eslint/no-duplicate-enum-values": "error",
+      "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-inferrable-types": "error",
       "@typescript-eslint/no-mixed-enums": "error",
       "@typescript-eslint/no-require-imports": "error",
@@ -82,11 +86,11 @@ export default [
       "@typescript-eslint/prefer-literal-enum-member": "error",
       "@typescript-eslint/prefer-nullish-coalescing": "error",
       "eqeqeq": "error",
-      "indent": "off", // @stylistic/ts/indent
+      "indent": "off", // @stylistic/indent
       "sort-keys": "error",
-      // "@typescript-eslint/no-unsafe-argument": "error", // TODO: Enable this rule, https://github.com/openfrontio/OpenFrontIO/issues/1780
-      // "@typescript-eslint/no-unsafe-assignment": "error", // TODO: Enable this rule, https://github.com/openfrontio/OpenFrontIO/issues/1781
-      // "@typescript-eslint/no-unsafe-member-access": "error", // TODO: Enable this rule, https://github.com/openfrontio/OpenFrontIO/issues/1783
+      "@typescript-eslint/no-unsafe-argument": "error",
+      "@typescript-eslint/no-unsafe-assignment": "error",
+      "@typescript-eslint/no-unsafe-member-access": "error",
       // "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }], // TODO: Enable this rule, https://github.com/openfrontio/OpenFrontIO/issues/1784
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/prefer-for-of": "error",
@@ -104,6 +108,7 @@ export default [
       "max-lines-per-function": ["error", { max: 561 }],
       "no-loss-of-precision": "error",
       "no-multi-spaces": "error",
+      "no-trailing-spaces": "error",
       "object-curly-newline": ["error", { multiline: true, consistent: true }],
       "object-curly-spacing": ["error", "always"],
       "object-property-newline": ["error", { allowAllPropertiesOnSameLine: true }],
@@ -124,10 +129,33 @@ export default [
     files: [
       "**/*.config.{js,ts,jsx,tsx}",
       "**/*.test.{js,ts,jsx,tsx}",
+      "tests/**/*.{js,ts,jsx,tsx}",
+      "eslint-plugin-local/**/*.{js,ts,jsx,tsx}",
+    ],
+    rules: {
+      // Disabled rules for tests, configs
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unsafe-argument": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      "sort-keys": "off",
+    },
+  },
+  {
+    files: [
       "src/client/**/*.{js,ts,jsx,tsx}",
     ],
     rules: {
+      // Disabled rules for frontend
       "sort-keys": "off",
+    },
+  },
+  {
+    plugins: {
+      local: eslintPluginLocal,
+    },
+    rules: {
+      "local/no-z-array": "error",
     },
   },
 ];

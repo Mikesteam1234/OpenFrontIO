@@ -64,6 +64,7 @@ export class Cloudflare {
   private async makeRequest<T>(
     url: string,
     method = "GET",
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data?: any,
   ): Promise<T> {
     const response = await fetch(url, {
@@ -255,9 +256,11 @@ export class Cloudflare {
     );
 
     cloudflared.stdout?.on("data", (data) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       log.info(data.toString().trim());
     });
     cloudflared.stderr?.on("data", (data) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       log.error(data.toString().trim());
     });
 
