@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import cluster from "cluster";
 import express from "express";
 import rateLimit from "express-rate-limit";
@@ -91,6 +92,7 @@ export async function startMaster() {
 
   cluster.on("message", (worker, message) => {
     if (message.type === "WORKER_READY") {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const workerId = message.workerId;
       readyWorkers.add(workerId);
       log.info(
@@ -121,6 +123,7 @@ export async function startMaster() {
 
   // Handle worker crashes
   cluster.on("exit", (worker, code, signal) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
     const workerId = (worker as any).process?.env?.WORKER_ID;
     if (!workerId) {
       log.error(`worker crashed could not find id`);
@@ -134,6 +137,7 @@ export async function startMaster() {
 
     // Restart the worker with the same ID
     const newWorker = cluster.fork({
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       WORKER_ID: workerId,
     });
 
