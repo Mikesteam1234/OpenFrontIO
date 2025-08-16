@@ -328,7 +328,7 @@ class Client {
         loginDiscordButton.translationKey = "main.login_discord";
         logoutDiscordButton.hidden = true;
         territoryModal.onUserMe(null);
-        piModal.onLoggedOut();
+        piModal.onUserMe(null);
       } else {
         // Authorized
         console.log(
