@@ -1,14 +1,20 @@
 import { html, LitElement } from "lit";
 import { customElement, query, state } from "lit/decorators.js";
 import { translateText } from "../client/Utils";
-import { PlayerIdResponseSchema, UserMeResponse, PlayerIdResponse } from "../core/ApiSchemas";
-import { getApiBase, getToken } from "./jwt";
+import {
+  PlayerIdResponse,
+  PlayerIdResponseSchema,
+  UserMeResponse,
+} from "../core/ApiSchemas";
 import { GameType } from "../core/game/Game";
-import { PlayerStats, PlayerStatsSchema } from "../core/StatsSchemas";
+import { PlayerStats } from "../core/StatsSchemas";
 import "./components/baseComponents/PlayerStatsGrid";
 import "./components/baseComponents/PlayerStatsTable";
+import { getApiBase, getToken } from "./jwt";
 
-async function fetchPlayerById(playerId: string): Promise<PlayerIdResponse | false> {
+async function fetchPlayerById(
+  playerId: string,
+): Promise<PlayerIdResponse | false> {
   try {
     const base = getApiBase();
     const token = await getToken();
@@ -22,7 +28,11 @@ async function fetchPlayerById(playerId: string): Promise<PlayerIdResponse | fal
     });
 
     if (res.status !== 200) {
-      console.warn("fetchPlayerById: unexpected status", res.status, res.statusText);
+      console.warn(
+        "fetchPlayerById: unexpected status",
+        res.status,
+        res.statusText,
+      );
       return false;
     }
 
@@ -51,20 +61,15 @@ export class PlayerInfoModal extends LitElement {
   @state() private visibility: GameType = GameType.Public;
   @state() private expandedGameId: string | null = null;
   @state() private loadError: string | null = null;
+  @state() private selectedMode: "Free For All" | "Team" = "Free For All";
+  @state() private selectedDifficulty:
+    | "Easy"
+    | "Medium"
+    | "Hard"
+    | "Impossible" = "Medium";
+  @state() private warningMessage: string | null = null;
 
-  private statsPublic: PlayerStats | null = null;
-  private statsPrivate: PlayerStats | null = null;
-
-  private _publicTotalsCache: {
-    wins: number;
-    losses: number;
-    total: number;
-  } | null = null;
-  private _privateTotalsCache: {
-    wins: number;
-    losses: number;
-    total: number;
-  } | null = null;
+  private statsTree: PlayerIdResponse["stats"] | undefined;
 
   private recentGames: {
     gameId: string;
@@ -120,105 +125,112 @@ export class PlayerInfoModal extends LitElement {
     super.disconnectedCallback();
   }
 
+  private getSelectedLeaf(): {
+    wins?: string;
+    losses?: string;
+    total?: string;
+    stats?: PlayerStats;
+  } | null {
+    const typeKey = this.visibility === GameType.Public ? "Public" : "Private";
+    const typeNode = (this.statsTree as any)?.[typeKey];
+    if (!typeNode) return null;
+    const modeNode = typeNode?.[this.selectedMode];
+    if (!modeNode) return null;
+    const diffNode = modeNode?.[this.selectedDifficulty];
+    if (!diffNode) return null;
+    return diffNode as any;
+  }
+
   private getDisplayedStats(): PlayerStats | null {
-    switch (this.visibility) {
-      case GameType.Public:
-        return this.statsPublic;
-      case GameType.Private:
-        return this.statsPrivate;
-      default:
-        return null;
-    }
+    const leaf = this.getSelectedLeaf();
+
+    if (!leaf || !leaf.stats) return {} as PlayerStats;
+    return leaf.stats as PlayerStats;
   }
 
   private setVisibility(v: GameType.Public | GameType.Private) {
     this.visibility = v;
+    const typeKey = this.visibility === GameType.Public ? "Public" : "Private";
+    const typeNode = (this.statsTree as any)?.[typeKey] || {};
+    const modes = Object.keys(typeNode) as ("Free For All" | "Team")[];
+    if (modes.length) {
+      if (!modes.includes(this.selectedMode)) this.selectedMode = modes[0];
+      const diffs = Object.keys(typeNode[this.selectedMode] || {}) as (
+        | "Easy"
+        | "Medium"
+        | "Hard"
+        | "Impossible"
+      )[];
+      // Keep current selection; warning will handle missing data
+    }
+    this.requestUpdate();
+  }
+
+  private setMode(m: "Free For All" | "Team") {
+    // Always reflect selection visually
+    this.selectedMode = m;
+
+    const typeKey = this.visibility === GameType.Public ? "Public" : "Private";
+    const typeNode = (this.statsTree as any)?.[typeKey];
+
+    if (!typeNode || !typeNode[m]) {
+      // No data for this mode under current type → keep selection, just warn
+      this.warningMessage = "player_modal.no_data";
+      this.requestUpdate();
+      return;
+    }
+
+    // Data exists for this mode. Do not auto-change difficulty; just clear warning.
+    this.warningMessage = null;
+    this.requestUpdate();
+  }
+
+  private setDifficulty(d: "Easy" | "Medium" | "Hard" | "Impossible") {
+    this.selectedDifficulty = d;
+
+    const typeKey = this.visibility === GameType.Public ? "Public" : "Private";
+    const modeNode = (this.statsTree as any)?.[typeKey]?.[this.selectedMode];
+
+    if (!modeNode || !modeNode[d]) {
+      this.warningMessage = "player_modal.no_data";
+    } else {
+      this.warningMessage = null;
+    }
+
     this.requestUpdate();
   }
 
   private applyBackendStats(rawStats: any): void {
-    let pubStatsAgg: PlayerStats | null = null;
-    let prvStatsAgg: PlayerStats | null = null;
+    // Keep the raw nested structure so we can select per type/mode/difficulty
+    this.statsTree = rawStats ?? undefined;
 
-    const totals = {
-      public: { wins: 0, losses: 0, total: 0 },
-      private: { wins: 0, losses: 0, total: 0 },
-    } as const;
+    // Initialize selector defaults to the first available keys under current visibility
+    const typeKey = this.visibility === GameType.Public ? "Public" : "Private";
+    const typeNode = (this.statsTree && (this.statsTree as any)[typeKey]) || {};
 
-    const publicTotals = { ...totals.public };
-    const privateTotals = { ...totals.private };
+    const availableModes = Object.keys(typeNode) as ("Free For All" | "Team")[];
+    if (availableModes.length > 0) {
+      this.selectedMode = availableModes.includes(this.selectedMode)
+        ? this.selectedMode
+        : availableModes[0];
 
-    for (const [typeKey, typeNode] of Object.entries<any>(rawStats ?? {})) {
-      if (!typeNode || typeof typeNode !== "object") continue;
-      const vis: "public" | "private" | null =
-        typeKey === "Public"
-          ? "public"
-          : typeKey === "Private"
-            ? "private"
-            : null;
-      if (!vis) continue;
-
-      for (const modeNode of Object.values<any>(typeNode)) {
-        if (!modeNode || typeof modeNode !== "object") continue;
-
-        for (const diffNode of Object.values<any>(modeNode)) {
-          if (!diffNode || typeof diffNode !== "object") continue;
-
-          const parsed = PlayerStatsSchema.safeParse(diffNode.stats ?? {});
-          if (parsed.success) {
-            if (vis === "public") {
-              pubStatsAgg = pubStatsAgg
-                ? this.mergePlayerStats(pubStatsAgg, parsed.data)
-                : parsed.data;
-            } else {
-              prvStatsAgg = prvStatsAgg
-                ? this.mergePlayerStats(prvStatsAgg, parsed.data)
-                : parsed.data;
-            }
-          }
-
-          const wins = Number((diffNode).wins ?? 0);
-          const losses = Number((diffNode).losses ?? 0);
-          const total = Number((diffNode).total ?? 0);
-          if (vis === "public") {
-            publicTotals.wins += wins;
-            publicTotals.losses += losses;
-            publicTotals.total += total;
-          } else {
-            privateTotals.wins += wins;
-            privateTotals.losses += losses;
-            privateTotals.total += total;
-          }
-        }
+      const modeNode = (typeNode as any)[this.selectedMode] || {};
+      const availableDiffs = Object.keys(modeNode) as (
+        | "Easy"
+        | "Medium"
+        | "Hard"
+        | "Impossible"
+      )[];
+      if (availableDiffs.length > 0) {
+        this.selectedDifficulty = availableDiffs.includes(
+          this.selectedDifficulty,
+        )
+          ? this.selectedDifficulty
+          : availableDiffs[0];
       }
     }
 
-    this.statsPublic = pubStatsAgg;
-    this.statsPrivate = prvStatsAgg;
-
-    this._publicTotalsCache = { ...publicTotals };
-    this._privateTotalsCache = { ...privateTotals };
-
     this.requestUpdate();
-  }
-
-  private mergePlayerStats(a: PlayerStats, b: PlayerStats): PlayerStats {
-    const safeA = a ?? {};
-    const safeB = b ?? {};
-    const mergeArrays = (arr1?: any[], arr2?: any[]) => {
-      if (!arr1 && !arr2) return undefined;
-      if (!arr1) return arr2;
-      if (!arr2) return arr1;
-      return arr1.map((v, i) => Number(v ?? 0) + Number(arr2[i] ?? 0));
-    };
-    return {
-      attacks: mergeArrays(safeA.attacks, safeB.attacks),
-      betrayals: (safeA.betrayals ?? 0n) + (safeB.betrayals ?? 0n),
-      boats: { ...(safeA.boats ?? {}), ...(safeB.boats ?? {}) },
-      bombs: { ...(safeA.bombs ?? {}), ...(safeB.bombs ?? {}) },
-      gold: mergeArrays(safeA.gold, safeB.gold),
-      units: { ...(safeA.units ?? {}), ...(safeB.units ?? {}) },
-    };
   }
 
   render() {
@@ -233,27 +245,15 @@ export class PlayerInfoModal extends LitElement {
         ? `https://cdn.discordapp.com/embed/avatars/${Number(u.discriminator) % 5}.png`
         : "";
 
-    const visTotals =
-      this.visibility === GameType.Public
-        ? (this._publicTotalsCache ?? { wins: 0n, losses: 0n, total: 0n })
-        : (this._privateTotalsCache ?? { wins: 0n, losses: 0n, total: 0n });
-    const wins = visTotals.wins ?? 0n;
-    const losses = visTotals.losses ?? 0n;
-    const gamesPlayed = visTotals.total ?? 0n;
-    let wlr: string | number = 0;
-    if (typeof wins === "bigint" || typeof losses === "bigint") {
-      if (losses === 0n) {
-        wlr = wins.toString();
-      } else {
-        wlr = Number(wins) / Number(losses);
-      }
-    } else {
-      wlr = losses === 0 ? wins : wins / losses;
-    }
+    const leaf = this.getSelectedLeaf();
+    const wins = Number((leaf?.wins as any) ?? 0);
+    const losses = Number((leaf?.losses as any) ?? 0);
+    const gamesPlayed = Number((leaf?.total as any) ?? 0);
+    const wlr = losses === 0 ? wins : wins / losses;
     const lastActive = this.recentGames.length
       ? new Date(
-        Math.max(...this.recentGames.map((g) => Date.parse(g.start))),
-      ).toLocaleDateString()
+          Math.max(...this.recentGames.map((g) => Date.parse(g.start))),
+        ).toLocaleDateString()
       : translateText("player_modal.na");
     const playTimeText = translateText("player_modal.na");
 
@@ -264,12 +264,26 @@ export class PlayerInfoModal extends LitElement {
         alwaysMaximized
       >
         <div class="flex flex-col items-center mt-2 mb-4">
-          ${this.loadError ? html`
-            <div class="w-full max-w-md mb-3 px-3 py-2 rounded border text-sm text-center"
-                 style="background: rgba(220,38,38,0.15); border-color: rgba(248,113,113,0.6); color: rgb(254,202,202);">
-              ${translateText(this.loadError)}
-            </div>
-          ` : null}
+          ${this.loadError
+            ? html`
+                <div
+                  class="w-full max-w-md mb-3 px-3 py-2 rounded border text-sm text-center"
+                  style="background: rgba(220,38,38,0.15); border-color: rgba(248,113,113,0.6); color: rgb(254,202,202);"
+                >
+                  ${translateText(this.loadError)}
+                </div>
+              `
+            : null}
+          ${this.warningMessage
+            ? html`
+                <div
+                  class="w-full max-w-md mb-3 px-3 py-2 rounded border text-sm text-center"
+                  style="background: rgba(202,138,4,0.15); border-color: rgba(253,224,71,0.6); color: rgb(253,224,71);"
+                >
+                  ${translateText(this.warningMessage)}
+                </div>
+              `
+            : null}
           <br />
           <div class="flex items-center gap-2">
             <div class="p-[3px] rounded-full bg-gray-500">
@@ -318,6 +332,44 @@ export class PlayerInfoModal extends LitElement {
             >
               ${translateText("player_modal.private")}
             </button>
+          </div>
+
+          <!-- Mode selector -->
+          <div class="flex gap-2 mt-2">
+            ${(["Free For All", "Team"] as const).map(
+              (m) => html`
+                <button
+                  class="text-xs px-2 py-0.5 rounded border ${this
+                    .selectedMode === m
+                    ? "border-white/60 text-white"
+                    : "border-white/20 text-gray-300"}"
+                  @click=${() => this.setMode(m)}
+                  title=${translateText("player_modal.mode")}
+                >
+                  ${m === "Free For All"
+                    ? translateText("player_modal.mode_ffa")
+                    : translateText("player_modal.mode_team")}
+                </button>
+              `,
+            )}
+          </div>
+
+          <!-- Difficulty selector -->
+          <div class="flex gap-2 mt-2">
+            ${(["Easy", "Medium", "Hard", "Impossible"] as const).map(
+              (d) => html`
+                <button
+                  class="text-xs px-2 py-0.5 rounded border ${this
+                    .selectedDifficulty === d
+                    ? "border-white/60 text-white"
+                    : "border-white/20 text-gray-300"}"
+                  @click=${() => this.setDifficulty(d)}
+                  title=${translateText("player_modal.difficulty")}
+                >
+                  ${d}
+                </button>
+              `,
+            )}
           </div>
 
           <hr class="w-2/3 border-gray-600 my-2" />
@@ -411,8 +463,8 @@ export class PlayerInfoModal extends LitElement {
                         ? "200px"
                         : "0"};
                              ${this.expandedGameId === game.gameId
-                                ? ""
-                                : "padding-top:0;padding-bottom:0;"}"
+                        ? ""
+                        : "padding-top:0;padding-bottom:0;"}"
                     >
                       <div>
                         <span class="font-semibold"
@@ -496,7 +548,10 @@ export class PlayerInfoModal extends LitElement {
         map: g.map,
         difficulty: g.difficulty,
         type: g.type,
-        gameMode: g.mode && String(g.mode).toLowerCase().includes("team") ? "team" : "ffa",
+        gameMode:
+          g.mode && String(g.mode).toLowerCase().includes("team")
+            ? "team"
+            : "ffa",
       }));
 
       this.requestUpdate();

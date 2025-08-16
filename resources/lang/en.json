@@ -632,6 +632,7 @@
     "na": "N/A",
     "flag_alt": "Flag",
     "avatar_alt": "Avatar",
+    "no_data": "No data available for this selection",
     "error": {
       "load": "Failed to load player data.",
       "validate": "Failed to validate player data from server."
