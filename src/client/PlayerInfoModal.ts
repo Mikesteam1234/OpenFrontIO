@@ -11,9 +11,9 @@ import {
 } from "../core/ApiSchemas";
 import { GameType, GameTypeValue, DifficultyType, GameMode, GameModeType, Difficulty } from "../core/game/Game";
 import { PlayerStats } from "../core/StatsSchemas";
-import "./components/baseComponents/PlayerStatsGrid";
-import "./components/baseComponents/PlayerStatsTable";
-import "./components/baseComponents/GameList";
+import "./components/baseComponents/stats/PlayerStatsGrid";
+import "./components/baseComponents/stats/PlayerStatsTable";
+import "./components/baseComponents/stats/GameList";
 import { fetchPlayerById } from "./jwt";
 
 @customElement("player-info-modal")

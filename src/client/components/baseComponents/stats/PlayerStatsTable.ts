@@ -1,7 +1,7 @@
 import { css, html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { boatUnits, bombUnits, otherUnits, PlayerStats } from "../../../core/StatsSchemas";
-import { renderNumber, translateText } from "../../Utils";
+import { boatUnits, bombUnits, otherUnits, PlayerStats } from "../../../../core/StatsSchemas";
+import { renderNumber, translateText } from "../../../Utils";
 
 @customElement("player-stats-table")
 export class PlayerStatsTable extends LitElement {
