@@ -147,11 +147,6 @@ export class PlayerInfoModal extends LitElement {
     const modes = Object.keys(typeNode) as GameModeType[];
     if (modes.length) {
       if (!modes.includes(this.selectedMode)) this.selectedMode = modes[0];
-      const selectedModeNode =
-        (typeNode as Partial<
-          Record<GameModeType, Partial<Record<DifficultyType, PlayerStatsLeaf>>>
-        >)[this.selectedMode] ?? {};
-      const _diffs = Object.keys(selectedModeNode) as DifficultyType[];
     }
     this.requestUpdate();
   }
