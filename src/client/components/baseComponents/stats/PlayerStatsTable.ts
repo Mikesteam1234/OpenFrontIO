@@ -98,7 +98,7 @@ export class PlayerStatsTable extends LitElement {
               const destroyed = stats?.boats?.[key]?.[3] ?? 0n;
               return html`
                 <tr>
-                  <td>${translateText(`player_stats_table.${key}`)}</td>
+                  <td>${translateText(`player_stats_table.unit.${key}`)}</td>
                   <td>${renderNumber(sent)}</td>
                   <td>${renderNumber(destroyed)}</td>
                   <td>${renderNumber(arrived)}</td>
@@ -137,7 +137,7 @@ export class PlayerStatsTable extends LitElement {
               const intercepted = stats?.bombs?.[bomb]?.[2] ?? 0n;
               return html`
                 <tr>
-                  <td>${translateText(`player_stats_table.${bomb}`)}</td>
+                  <td>${translateText(`player_stats_table.unit.${bomb}`)}</td>
                   <td class="text-center">${renderNumber(launched)}</td>
                   <td class="text-center">${renderNumber(landed)}</td>
                   <td class="text-center">${renderNumber(intercepted)}</td>

@@ -2,8 +2,6 @@ import { html, LitElement } from "lit";
 import { customElement, query, state } from "lit/decorators.js";
 import { translateText } from "../client/Utils";
 import {
-  PlayerIdResponse,
-  PlayerIdResponseSchema,
   UserMeResponse,
   PlayerStatsLeaf,
   PlayerStatsTree,
