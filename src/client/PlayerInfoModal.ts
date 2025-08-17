@@ -75,7 +75,7 @@ export class PlayerInfoModal extends LitElement {
     map: string;
     difficulty: string;
     type: string;
-    gameMode: "ffa" | "team";
+    gameMode: GameModeType;
     teamCount?: number;
     teamColor?: string;
   }[] = [];
@@ -406,13 +406,13 @@ export class PlayerInfoModal extends LitElement {
                         </div>
                         <div class="text-xs text-gray-400">
                           ${translateText("player_modal.mode")}:
-                          ${game.gameMode === "ffa"
+                          ${game.gameMode === GameMode.FFA
                             ? translateText("player_modal.mode_ffa")
                             : html`${translateText("player_modal.mode_team")}
                               (${game.teamCount}
                               ${translateText("player_modal.teams")})`}
                         </div>
-                        ${game.gameMode === "team" && game.teamColor
+                        ${game.gameMode === GameMode.Team && game.teamColor
                           ? html`
                               <div class="text-white text-xs font-semibold">
                                 ${translateText(
@@ -458,7 +458,7 @@ export class PlayerInfoModal extends LitElement {
                         <span class="font-semibold"
                           >${translateText("player_modal.mode")}:</span
                         >
-                        ${game.gameMode === "ffa"
+                        ${game.gameMode === GameMode.FFA
                           ? translateText("player_modal.mode_ffa")
                           : `${translateText("player_modal.mode_team")} (${game.teamCount ?? "?"} ${translateText("player_modal.teams")})`}
                       </div>
@@ -529,10 +529,7 @@ export class PlayerInfoModal extends LitElement {
         map: g.map,
         difficulty: g.difficulty,
         type: g.type,
-        gameMode:
-          g.mode && String(g.mode).toLowerCase().includes("team")
-            ? "team"
-            : "ffa",
+        gameMode: g.mode,
       }));
 
       this.requestUpdate();
