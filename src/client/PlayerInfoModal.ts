@@ -195,8 +195,13 @@ export class PlayerInfoModal extends LitElement {
           ${this.loadError
             ? html`
                 <div
+                <div
                   class="w-full max-w-md mb-3 px-3 py-2 rounded border text-sm text-center"
-                  style="background: rgba(220,38,38,0.15); border-color: rgba(248,113,113,0.6); color: rgb(254,202,202);"
+                  style="
+                    background: rgba(220,38,38,0.15);
+                    border-color: rgba(248,113,113,0.6);
+                    color: rgb(254,202,202);
+                  "
                 >
                   ${translateText(this.loadError)}
                 </div>
