@@ -72,6 +72,17 @@ export const PlayerStatsTreeSchema = z.partialRecord(
 );
 export type PlayerStatsTree = z.infer<typeof PlayerStatsTreeSchema>;
 
+export const PlayerGameSchema = z.object({
+  gameId: z.string(),
+  start: z.iso.datetime(),
+  mode: z.enum(GameMode),
+  type: z.enum(GameType),
+  map: z.enum(GameMapType),
+  difficulty: z.enum(Difficulty),
+  clientId: z.string().optional(),
+});
+export type PlayerGame = z.infer<typeof PlayerGameSchema>;
+
 export const PlayerIdResponseSchema = z.object({
   createdAt: z.iso.datetime(),
   user: z
@@ -83,17 +94,7 @@ export const PlayerIdResponseSchema = z.object({
       discriminator: z.string(),
     })
     .optional(),
-  games: z
-    .object({
-      gameId: z.string(),
-      start: z.iso.datetime(),
-      mode: z.enum(GameMode),
-      type: z.enum(GameType),
-      map: z.enum(GameMapType),
-      difficulty: z.enum(Difficulty),
-      clientId: z.string().optional(),
-    })
-    .array(),
+  games: PlayerGameSchema.array(),
   stats: PlayerStatsTreeSchema,
 });
 export type PlayerIdResponse = z.infer<typeof PlayerIdResponseSchema>;

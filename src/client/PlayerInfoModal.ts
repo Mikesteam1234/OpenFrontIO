@@ -7,11 +7,13 @@ import {
   UserMeResponse,
   PlayerStatsLeaf,
   PlayerStatsTree,
+  PlayerGame,
 } from "../core/ApiSchemas";
 import { GameType, GameTypeValue, DifficultyType, GameMode, GameModeType, Difficulty } from "../core/game/Game";
 import { PlayerStats } from "../core/StatsSchemas";
 import "./components/baseComponents/PlayerStatsGrid";
 import "./components/baseComponents/PlayerStatsTable";
+import "./components/baseComponents/GameList";
 import { getApiBase, getToken } from "./jwt";
 
 async function fetchPlayerById(
@@ -61,7 +63,6 @@ export class PlayerInfoModal extends LitElement {
 
   @state() private userMeResponse: UserMeResponse | null = null;
   @state() private visibility: GameTypeValue = GameType.Public;
-  @state() private expandedGameId: string | null = null;
   @state() private loadError: string | null = null;
   @state() private selectedMode: GameModeType = GameMode.FFA;
   @state() private selectedDifficulty: DifficultyType = Difficulty.Medium;
@@ -69,16 +70,7 @@ export class PlayerInfoModal extends LitElement {
 
   private statsTree: PlayerStatsTree | undefined;
 
-  private recentGames: {
-    gameId: string;
-    start: string;
-    map: string;
-    difficulty: string;
-    type: string;
-    gameMode: GameModeType;
-    teamCount?: number;
-    teamColor?: string;
-  }[] = [];
+  private recentGames: PlayerGame[] = [];
 
   private viewGame(gameId: string): void {
     this.close();
@@ -91,9 +83,6 @@ export class PlayerInfoModal extends LitElement {
     window.dispatchEvent(new HashChangeEvent("hashchange"));
   }
 
-  private toggleGameDetails(gameId: string): void {
-    this.expandedGameId = this.expandedGameId === gameId ? null : gameId;
-  }
 
   private formatPlayTime(seconds: number): string {
     const h = Math.floor(seconds / 3600);
@@ -380,106 +369,14 @@ export class PlayerInfoModal extends LitElement {
 
           <hr class="w-2/3 border-gray-600 my-2" />
 
-          <hr class="w-2/3 border-gray-600 my-2" />
-
           <div class="mt-4 w-full max-w-md">
             <div class="text-sm text-gray-400 font-semibold mb-1">
               🎮 ${translateText("player_modal.recent_games")}
             </div>
-            <div class="flex flex-col gap-2">
-              ${this.recentGames.map(
-                (game) => html`
-                  <div
-                    class="bg-white/5 rounded border border-white/10 overflow-hidden transition-all duration-300"
-                  >
-                    <!-- header row -->
-                    <div class="flex items-center justify-between px-4 py-2">
-                      <div>
-                        <div class="text-sm font-semibold text-white">
-                          ${translateText("player_modal.game_id")}:
-                          ${game.gameId}
-                        </div>
-                        <div class="text-xs text-gray-400">
-                          ${translateText("player_modal.mode")}:
-                          ${game.gameMode === GameMode.FFA
-                            ? translateText("player_modal.mode_ffa")
-                            : html`${translateText("player_modal.mode_team")}
-                              (${game.teamCount ?? "?"}
-                              ${translateText("player_modal.teams")})`}
-                        </div>
-                        ${game.gameMode === GameMode.Team && game.teamColor
-                          ? html`
-                              <div class="text-white text-xs font-semibold">
-                                ${translateText(
-                                  "player_modal.player_team_color",
-                                )}:
-                                ${game.teamColor}
-                              </div>
-                            `
-                          : null}
-                      </div>
-                      <div class="flex gap-2">
-                        <button
-                          class="text-sm text-gray-300 bg-gray-700 px-3 py-1 rounded"
-                          @click=${() => this.viewGame(game.gameId)}
-                        >
-                          ${translateText("player_modal.view")}
-                        </button>
-                        <button
-                          class="text-sm text-gray-300 bg-gray-600 px-3 py-1 rounded"
-                          @click=${() => this.toggleGameDetails(game.gameId)}
-                        >
-                          ${translateText("player_modal.details")}
-                        </button>
-                      </div>
-                    </div>
-                    <!-- collapsible details inside the same card -->
-                    <div
-                      class="px-4 pb-2 text-xs text-gray-300 transition-all duration-300"
-                      style="max-height: ${this.expandedGameId === game.gameId
-                        ? "200px"
-                        : "0"};
-                             ${this.expandedGameId === game.gameId
-                                ? ""
-                                : "padding-top:0;padding-bottom:0;"}"
-                    >
-                      <div>
-                        <span class="font-semibold"
-                          >${translateText("player_modal.started")}:</span
-                        >
-                        ${new Date(game.start).toLocaleString()}
-                      </div>
-                      <div>
-                        <span class="font-semibold"
-                          >${translateText("player_modal.mode")}:</span
-                        >
-                        ${game.gameMode === GameMode.FFA
-                          ? translateText("player_modal.mode_ffa")
-                          : `${translateText("player_modal.mode_team")} (${game.teamCount ?? "?"} ${translateText("player_modal.teams")})`}
-                      </div>
-                      <div>
-                        <span class="font-semibold"
-                          >${translateText("player_modal.map")}:</span
-                        >
-                        ${game.map}
-                      </div>
-                      <div>
-                        <span class="font-semibold"
-                          >${translateText("player_modal.difficulty")}:</span
-                        >
-                        ${game.difficulty}
-                      </div>
-                      <div>
-                        <span class="font-semibold"
-                          >${translateText("player_modal.type")}:</span
-                        >
-                        ${game.type}
-                      </div>
-                    </div>
-                  </div>
-                `,
-              )}
-            </div>
+            <game-list
+              .games=${this.recentGames}
+              .onViewGame=${(id: string) => this.viewGame(id)}
+            ></game-list>
           </div>
         </div>
       </o-modal>
@@ -518,14 +415,7 @@ export class PlayerInfoModal extends LitElement {
 
       this.applyBackendStats(data.stats);
 
-      this.recentGames = data.games.map((g) => ({
-        gameId: g.gameId,
-        start: g.start,
-        map: g.map,
-        difficulty: g.difficulty,
-        type: g.type,
-        gameMode: g.mode,
-      }));
+      this.recentGames = data.games;
 
       this.requestUpdate();
     } catch (err) {
