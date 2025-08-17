@@ -328,7 +328,7 @@ export class PlayerInfoModal extends LitElement {
                   @click=${() => this.setMode(m)}
                   title=${translateText("player_modal.mode")}
                 >
-                  ${m === "Free For All"
+                  ${m === GameMode.FFA
                     ? translateText("player_modal.mode_ffa")
                     : translateText("player_modal.mode_team")}
                 </button>
