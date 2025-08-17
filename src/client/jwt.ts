@@ -8,6 +8,7 @@ import {
   UserMeResponseSchema,
 } from "../core/ApiSchemas";
 import { getServerConfigFromClient } from "../core/configuration/ConfigLoader";
+import { PlayerIdResponse, PlayerIdResponseSchema } from "../core/ApiSchemas";
 
 function getAudience() {
   const { hostname } = new URL(window.location.href);
@@ -22,7 +23,7 @@ export function getApiBase() {
     : `https://api.${domainname}`;
 }
 
-export function getToken(): string | null {
+function getToken(): string | null {
   // Check window hash
   const { hash } = window.location;
   if (hash.startsWith("#")) {
@@ -244,6 +245,44 @@ export async function getUserMe(): Promise<UserMeResponse | false> {
     return result.data;
   } catch (e) {
     __isLoggedIn = false;
+    return false;
+  }
+}
+
+export async function fetchPlayerById(
+  playerId: string,
+): Promise<PlayerIdResponse | false> {
+  try {
+    const base = getApiBase();
+    const token = getToken();
+    const url = `${base}/player/${encodeURIComponent(playerId)}`;
+
+    const res = await fetch(url, {
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (res.status !== 200) {
+      console.warn(
+        "fetchPlayerById: unexpected status",
+        res.status,
+        res.statusText,
+      );
+      return false;
+    }
+
+    const json = await res.json();
+    const parsed = PlayerIdResponseSchema.safeParse(json);
+    if (!parsed.success) {
+      console.warn("fetchPlayerById: Zod validation failed", parsed.error);
+      return false;
+    }
+
+    return parsed.data;
+  } catch (err) {
+    console.warn("fetchPlayerById: request failed", err);
     return false;
   }
 }

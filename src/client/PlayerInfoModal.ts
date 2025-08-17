@@ -14,45 +14,7 @@ import { PlayerStats } from "../core/StatsSchemas";
 import "./components/baseComponents/PlayerStatsGrid";
 import "./components/baseComponents/PlayerStatsTable";
 import "./components/baseComponents/GameList";
-import { getApiBase, getToken } from "./jwt";
-
-async function fetchPlayerById(
-  playerId: string,
-): Promise<PlayerIdResponse | false> {
-  try {
-    const base = getApiBase();
-    const token = await getToken();
-    const url = `${base}/player/${encodeURIComponent(playerId)}`;
-
-    const res = await fetch(url, {
-      headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (res.status !== 200) {
-      console.warn(
-        "fetchPlayerById: unexpected status",
-        res.status,
-        res.statusText,
-      );
-      return false;
-    }
-
-    const json = await res.json();
-    const parsed = PlayerIdResponseSchema.safeParse(json);
-    if (!parsed.success) {
-      console.warn("fetchPlayerById: Zod validation failed", parsed.error);
-      return false;
-    }
-
-    return parsed.data;
-  } catch (err) {
-    console.warn("fetchPlayerById: request failed", err);
-    return false;
-  }
-}
+import { fetchPlayerById } from "./jwt";
 
 @customElement("player-info-modal")
 export class PlayerInfoModal extends LitElement {
