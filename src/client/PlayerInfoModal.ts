@@ -409,7 +409,7 @@ export class PlayerInfoModal extends LitElement {
                           ${game.gameMode === GameMode.FFA
                             ? translateText("player_modal.mode_ffa")
                             : html`${translateText("player_modal.mode_team")}
-                              (${game.teamCount}
+                              (${game.teamCount ?? "?"}
                               ${translateText("player_modal.teams")})`}
                         </div>
                         ${game.gameMode === GameMode.Team && game.teamColor
