@@ -194,3 +194,4 @@ export class PlayerStatsTable extends LitElement {
     `;
   }
 }
+
