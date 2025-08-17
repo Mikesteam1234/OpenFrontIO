@@ -83,17 +83,18 @@ export const PlayerGameSchema = z.object({
 });
 export type PlayerGame = z.infer<typeof PlayerGameSchema>;
 
+export const DiscordUserSchema = z.object({
+  id: z.string(),
+  avatar: z.string().nullable(),
+  username: z.string(),
+  global_name: z.string().nullable(),
+  discriminator: z.string(),
+});
+export type DiscordUser = z.infer<typeof DiscordUserSchema>;
+
 export const PlayerIdResponseSchema = z.object({
   createdAt: z.iso.datetime(),
-  user: z
-    .object({
-      id: z.string(),
-      avatar: z.string().nullable(),
-      username: z.string(),
-      global_name: z.string().nullable(),
-      discriminator: z.string(),
-    })
-    .optional(),
+  user: DiscordUserSchema.optional(),
   games: PlayerGameSchema.array(),
   stats: PlayerStatsTreeSchema,
 });

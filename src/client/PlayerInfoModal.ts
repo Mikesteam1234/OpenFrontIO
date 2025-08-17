@@ -2,16 +2,24 @@ import { html, LitElement } from "lit";
 import { customElement, query, state } from "lit/decorators.js";
 import { translateText } from "../client/Utils";
 import {
-  UserMeResponse,
+  PlayerGame,
   PlayerStatsLeaf,
   PlayerStatsTree,
-  PlayerGame,
+  UserMeResponse,
 } from "../core/ApiSchemas";
-import { GameType, GameTypeValue, DifficultyType, GameMode, GameModeType, Difficulty } from "../core/game/Game";
+import {
+  Difficulty,
+  DifficultyType,
+  GameMode,
+  GameModeType,
+  GameType,
+  GameTypeValue,
+} from "../core/game/Game";
 import { PlayerStats } from "../core/StatsSchemas";
+import "./components/baseComponents/stats/DiscordUserHeader";
+import "./components/baseComponents/stats/GameList";
 import "./components/baseComponents/stats/PlayerStatsGrid";
 import "./components/baseComponents/stats/PlayerStatsTable";
-import "./components/baseComponents/stats/GameList";
 import { fetchPlayerById } from "./jwt";
 
 @customElement("player-info-modal")
@@ -42,7 +50,6 @@ export class PlayerInfoModal extends LitElement {
     history.pushState({ join: gameId }, "", newUrl);
     window.dispatchEvent(new HashChangeEvent("hashchange"));
   }
-
 
   private formatPlayTime(seconds: number): string {
     const h = Math.floor(seconds / 3600);
@@ -143,9 +150,14 @@ export class PlayerInfoModal extends LitElement {
         : availableModes[0];
 
       const modeNode =
-        (typeNode as Partial<
-          Record<GameModeType, Partial<Record<DifficultyType, PlayerStatsLeaf>>>
-        >)[this.selectedMode] ?? {};
+        (
+          typeNode as Partial<
+            Record<
+              GameModeType,
+              Partial<Record<DifficultyType, PlayerStatsLeaf>>
+            >
+          >
+        )[this.selectedMode] ?? {};
       const availableDiffs = Object.keys(modeNode) as DifficultyType[];
       if (availableDiffs.length > 0) {
         this.selectedDifficulty = availableDiffs.includes(
@@ -162,14 +174,6 @@ export class PlayerInfoModal extends LitElement {
   render() {
     const flag = this.getStoredFlag();
     const playerName = this.getStoredName();
-
-    const u = this.userMeResponse?.user;
-    const discordName = u?.username ?? "";
-    const avatarUrl = u?.avatar
-      ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.${u.avatar.startsWith("a_") ? "gif" : "png"}`
-      : u?.discriminator !== undefined
-        ? `https://cdn.discordapp.com/embed/avatars/${Number(u.discriminator) % 5}.png`
-        : "";
 
     const leaf = this.getSelectedLeaf();
     const wins = Number(leaf?.wins ?? 0);
@@ -228,20 +232,9 @@ export class PlayerInfoModal extends LitElement {
             <!-- Names -->
             <span class="font-semibold">${playerName}</span>
             <span>|</span>
-            <span class="font-semibold">${discordName}</span>
-
-            <!-- Avatar -->
-            ${avatarUrl
-              ? html`
-                  <div class="p-[3px] rounded-full bg-gray-500">
-                    <img
-                      class="size-[48px] rounded-full block"
-                      src="${avatarUrl}"
-                      alt="${translateText("player_modal.avatar_alt")}"
-                    />
-                  </div>
-                `
-              : null}
+            <discord-user-header
+              .data=${this.userMeResponse?.user ?? null}
+            ></discord-user-header>
           </div>
           <!-- Visibility toggle under names -->
           <div class="flex gap-2 mt-2">
@@ -287,7 +280,14 @@ export class PlayerInfoModal extends LitElement {
 
           <!-- Difficulty selector -->
           <div class="flex gap-2 mt-2">
-            ${([Difficulty.Easy, Difficulty.Medium, Difficulty.Hard, Difficulty.Impossible] as const).map(
+            ${(
+              [
+                Difficulty.Easy,
+                Difficulty.Medium,
+                Difficulty.Hard,
+                Difficulty.Impossible,
+              ] as const
+            ).map(
               (d) => html`
                 <button
                   class="text-xs px-2 py-0.5 rounded border ${this
