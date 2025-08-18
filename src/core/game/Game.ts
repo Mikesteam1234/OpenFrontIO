@@ -37,7 +37,6 @@ export enum Difficulty {
   Hard = "Hard",
   Impossible = "Impossible",
 }
-export type DifficultyType = (typeof Difficulty)[keyof typeof Difficulty];
 
 export type Team = string;
 
@@ -136,13 +135,11 @@ export enum GameType {
   Public = "Public",
   Private = "Private",
 }
-export type GameTypeValue = (typeof GameType)[keyof typeof GameType];
 
 export enum GameMode {
   FFA = "Free For All",
   Team = "Team",
 }
-export type GameModeType = (typeof GameMode)[keyof typeof GameMode];
 
 export type UnitInfo = {
   cost: (player: Player) => Gold;

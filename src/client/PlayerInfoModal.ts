@@ -9,11 +9,8 @@ import {
 } from "../core/ApiSchemas";
 import {
   Difficulty,
-  DifficultyType,
   GameMode,
-  GameModeType,
   GameType,
-  GameTypeValue,
 } from "../core/game/Game";
 import { PlayerStats } from "../core/StatsSchemas";
 import "./components/baseComponents/stats/DiscordUserHeader";
@@ -30,10 +27,10 @@ export class PlayerInfoModal extends LitElement {
   };
 
   @state() private userMeResponse: UserMeResponse | null = null;
-  @state() private visibility: GameTypeValue = GameType.Public;
+  @state() private visibility: GameType = GameType.Public;
   @state() private loadError: string | null = null;
-  @state() private selectedMode: GameModeType = GameMode.FFA;
-  @state() private selectedDifficulty: DifficultyType = Difficulty.Medium;
+  @state() private selectedMode: GameMode = GameMode.FFA;
+  @state() private selectedDifficulty: Difficulty = Difficulty.Medium;
   @state() private warningMessage: string | null = null;
 
   private statsTree: PlayerStatsTree | undefined;
@@ -80,7 +77,7 @@ export class PlayerInfoModal extends LitElement {
   }
 
   private getSelectedLeaf(): PlayerStatsLeaf | null {
-    const typeKey: GameTypeValue = this.visibility;
+    const typeKey: GameType = this.visibility;
     const typeNode = this.statsTree?.[typeKey];
     if (!typeNode) return null;
     const modeNode = typeNode[this.selectedMode];
@@ -98,19 +95,19 @@ export class PlayerInfoModal extends LitElement {
 
   private setVisibility(v: GameType.Public | GameType.Private) {
     this.visibility = v;
-    const typeKey: GameTypeValue = this.visibility;
+    const typeKey: GameType = this.visibility;
     const typeNode = this.statsTree?.[typeKey] ?? {};
-    const modes = Object.keys(typeNode) as GameModeType[];
+    const modes = Object.keys(typeNode) as GameMode[];
     if (modes.length) {
       if (!modes.includes(this.selectedMode)) this.selectedMode = modes[0];
     }
     this.requestUpdate();
   }
 
-  private setMode(m: GameModeType) {
+  private setMode(m: GameMode) {
     this.selectedMode = m;
 
-    const typeKey: GameTypeValue = this.visibility;
+    const typeKey: GameType = this.visibility;
     const typeNode = this.statsTree?.[typeKey];
 
     if (!typeNode || !typeNode[m]) {
@@ -123,10 +120,10 @@ export class PlayerInfoModal extends LitElement {
     this.requestUpdate();
   }
 
-  private setDifficulty(d: DifficultyType) {
+  private setDifficulty(d: Difficulty) {
     this.selectedDifficulty = d;
 
-    const typeKey: GameTypeValue = this.visibility;
+    const typeKey: GameType = this.visibility;
     const modeNode = this.statsTree?.[typeKey]?.[this.selectedMode];
 
     if (!modeNode || !modeNode[d]) {
@@ -140,10 +137,10 @@ export class PlayerInfoModal extends LitElement {
 
   private applyBackendStats(rawStats: PlayerStatsTree): void {
     this.statsTree = rawStats;
-    const typeKey: GameTypeValue = this.visibility;
+    const typeKey: GameType = this.visibility;
     const typeNode = this.statsTree?.[typeKey] ?? {};
 
-    const availableModes = Object.keys(typeNode) as GameModeType[];
+    const availableModes = Object.keys(typeNode) as GameMode[];
     if (availableModes.length > 0) {
       this.selectedMode = availableModes.includes(this.selectedMode)
         ? this.selectedMode
@@ -153,12 +150,12 @@ export class PlayerInfoModal extends LitElement {
         (
           typeNode as Partial<
             Record<
-              GameModeType,
-              Partial<Record<DifficultyType, PlayerStatsLeaf>>
+              GameMode,
+              Partial<Record<Difficulty, PlayerStatsLeaf>>
             >
           >
         )[this.selectedMode] ?? {};
-      const availableDiffs = Object.keys(modeNode) as DifficultyType[];
+      const availableDiffs = Object.keys(modeNode) as Difficulty[];
       if (availableDiffs.length > 0) {
         this.selectedDifficulty = availableDiffs.includes(
           this.selectedDifficulty,
