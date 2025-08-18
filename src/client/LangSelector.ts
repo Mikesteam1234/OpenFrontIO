@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import "./LanguageModal";
 import { LitElement, html } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import "./LanguageModal";
 
 import ar from "../../resources/lang/ar.json";
 import bg from "../../resources/lang/bg.json";
@@ -26,6 +26,7 @@ import pl from "../../resources/lang/pl.json";
 import pt_BR from "../../resources/lang/pt-BR.json";
 import ru from "../../resources/lang/ru.json";
 import sh from "../../resources/lang/sh.json";
+import sk from "../../resources/lang/sk.json";
 import sl from "../../resources/lang/sl.json";
 import sv_SE from "../../resources/lang/sv-SE.json";
 import tp from "../../resources/lang/tp.json";
@@ -75,6 +76,7 @@ export class LangSelector extends LitElement {
     ko,
     gl,
     sl,
+    sk,
   };
 
   createRenderRoot() {
@@ -303,7 +305,12 @@ export class LangSelector extends LitElement {
         <button
           id="lang-selector"
           @click=${this.openModal}
-          class="text-center appearance-none w-full bg-blue-100 dark:bg-gray-700 hover:bg-blue-200 dark:hover:bg-gray-600 text-blue-900 dark:text-gray-100 p-3 sm:p-4 lg:p-5 font-medium text-sm sm:text-base lg:text-lg rounded-md border-none cursor-pointer transition-colors duration-300 flex items-center gap-2 justify-center"
+          class="text-center appearance-none w-full bg-blue-100
+          dark:bg-gray-700 hover:bg-blue-200 dark:hover:bg-gray-600
+          text-blue-900 dark:text-gray-100 p-3 sm:p-4 lg:p-5 font-medium
+          text-sm sm:text-base lg:text-lg rounded-md border-none cursor-pointer
+          transition-colors duration-300 flex items-center gap-2
+          justify-center"
         >
           <img
             id="lang-flag"
