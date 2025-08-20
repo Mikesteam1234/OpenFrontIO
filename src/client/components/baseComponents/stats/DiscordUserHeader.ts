@@ -63,18 +63,20 @@ export class DiscordUserHeader extends LitElement {
     const avatarUrl = this.avatarUrl;
 
     return html`
-      <span class="name">${this.discordDisplayName}</span>
-      ${avatarUrl
-        ? html`
-            <div class="avatarFrame">
-              <img
-                class="avatar"
-                src="${avatarUrl}"
-                alt="${translateText("player_modal.avatar_alt")}"
-              />
-            </div>
-          `
-        : null}
+      <div class="wrap">
+        ${avatarUrl
+          ? html`
+              <div class="avatarFrame">
+                <img
+                  class="avatar"
+                  src="${avatarUrl}"
+                  alt="${translateText("player_modal.avatar_alt")}"
+                />
+              </div>
+            `
+          : null}
+        <span class="name">${this.discordDisplayName}</span>
+      </div>
     `;
   }
 }

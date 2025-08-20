@@ -10,9 +10,9 @@ import {
 import {
   Difficulty,
   GameMode,
-  isGameMode,
   GameType,
   isDifficulty,
+  isGameMode,
 } from "../core/game/Game";
 import { PlayerStats } from "../core/StatsSchemas";
 import "./components/baseComponents/stats/DiscordUserHeader";
@@ -58,16 +58,6 @@ export class PlayerInfoModal extends LitElement {
 
   createRenderRoot() {
     return this;
-  }
-
-  private getStoredFlag(): string {
-    const storedFlag = localStorage.getItem("flag");
-    return storedFlag ?? "";
-  }
-
-  private getStoredName(): string {
-    const storedName = localStorage.getItem("username");
-    return storedName ?? "";
   }
 
   connectedCallback() {
@@ -151,10 +141,7 @@ export class PlayerInfoModal extends LitElement {
       const modeNode =
         (
           typeNode as Partial<
-            Record<
-              GameMode,
-              Partial<Record<Difficulty, PlayerStatsLeaf>>
-            >
+            Record<GameMode, Partial<Record<Difficulty, PlayerStatsLeaf>>>
           >
         )[this.selectedMode] ?? {};
       const availableDiffs = Object.keys(modeNode).filter(isDifficulty);
@@ -171,9 +158,6 @@ export class PlayerInfoModal extends LitElement {
   }
 
   render() {
-    const flag = this.getStoredFlag();
-    const playerName = this.getStoredName();
-
     const leaf = this.getSelectedLeaf();
     const wins = Number(leaf?.wins ?? 0);
     const losses = Number(leaf?.losses ?? 0);
@@ -218,22 +202,9 @@ export class PlayerInfoModal extends LitElement {
               `
             : null}
           <br />
-          <div class="flex items-center gap-2">
-            <div class="p-[3px] rounded-full bg-gray-500">
-              <img
-                class="size-[48px] rounded-full block"
-                src="/flags/${flag ?? "xx"}.svg"
-                alt="${translateText("player_modal.flag_alt")}"
-              />
-            </div>
-
-            <!-- Names -->
-            <span class="font-semibold">${playerName}</span>
-            <span>|</span>
-            <discord-user-header
-              .data=${this.userMeResponse?.user ?? null}
-            ></discord-user-header>
-          </div>
+          <discord-user-header
+            .data=${this.userMeResponse?.user ?? null}
+          ></discord-user-header>
           <!-- Visibility toggle under names -->
           <div class="flex gap-2 mt-2">
             <button
