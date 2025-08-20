@@ -94,7 +94,7 @@ export class PlayerInfoModal extends LitElement {
   }
 
   private setGameType(type: GameType) {
-    this.visibility = v;
+    this.visibility = type;
     const typeKey: GameType = this.visibility;
     const typeNode = this.statsTree?.[typeKey] ?? {};
     const modes = Object.keys(typeNode) as GameMode[];
@@ -194,7 +194,6 @@ export class PlayerInfoModal extends LitElement {
           ${this.loadError
             ? html`
                 <div
-                <div
                   class="w-full max-w-md mb-3 px-3 py-2 rounded border text-sm text-center"
                   style="
                     background: rgba(220,38,38,0.15);
@@ -240,7 +239,7 @@ export class PlayerInfoModal extends LitElement {
               GameType.Public
                 ? "border-white/60 text-white"
                 : "border-white/20 text-gray-300"}"
-              @click=${() => this.setVisibility(GameType.Public)}
+              @click=${() => this.setGameType(GameType.Public)}
             >
               ${translateText("player_modal.public")}
             </button>
@@ -249,7 +248,7 @@ export class PlayerInfoModal extends LitElement {
               GameType.Private
                 ? "border-white/60 text-white"
                 : "border-white/20 text-gray-300"}"
-              @click=${() => this.setVisibility(GameType.Private)}
+              @click=${() => this.setGameType(GameType.Private)}
             >
               ${translateText("player_modal.private")}
             </button>
