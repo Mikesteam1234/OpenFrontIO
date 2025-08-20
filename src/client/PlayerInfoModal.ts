@@ -93,7 +93,7 @@ export class PlayerInfoModal extends LitElement {
     return leaf.stats;
   }
 
-  private setVisibility(v: GameType.Public | GameType.Private) {
+  private setGameType(type: GameType) {
     this.visibility = v;
     const typeKey: GameType = this.visibility;
     const typeNode = this.statsTree?.[typeKey] ?? {};
