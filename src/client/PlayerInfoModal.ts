@@ -10,7 +10,9 @@ import {
 import {
   Difficulty,
   GameMode,
+  isGameMode,
   GameType,
+  isDifficulty,
 } from "../core/game/Game";
 import { PlayerStats } from "../core/StatsSchemas";
 import "./components/baseComponents/stats/DiscordUserHeader";
@@ -97,7 +99,7 @@ export class PlayerInfoModal extends LitElement {
     this.visibility = type;
     const typeKey: GameType = this.visibility;
     const typeNode = this.statsTree?.[typeKey] ?? {};
-    const modes = Object.keys(typeNode) as GameMode[];
+    const modes = Object.keys(typeNode).filter(isGameMode);
     if (modes.length) {
       if (!modes.includes(this.selectedMode)) this.selectedMode = modes[0];
     }
@@ -140,7 +142,7 @@ export class PlayerInfoModal extends LitElement {
     const typeKey: GameType = this.visibility;
     const typeNode = this.statsTree?.[typeKey] ?? {};
 
-    const availableModes = Object.keys(typeNode) as GameMode[];
+    const availableModes = Object.keys(typeNode).filter(isGameMode);
     if (availableModes.length > 0) {
       this.selectedMode = availableModes.includes(this.selectedMode)
         ? this.selectedMode
@@ -155,7 +157,7 @@ export class PlayerInfoModal extends LitElement {
             >
           >
         )[this.selectedMode] ?? {};
-      const availableDiffs = Object.keys(modeNode) as Difficulty[];
+      const availableDiffs = Object.keys(modeNode).filter(isDifficulty);
       if (availableDiffs.length > 0) {
         this.selectedDifficulty = availableDiffs.includes(
           this.selectedDifficulty,
