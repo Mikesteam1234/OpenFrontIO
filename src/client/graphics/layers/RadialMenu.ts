@@ -1,15 +1,16 @@
+/* eslint-disable max-lines */
 import * as d3 from "d3";
-import backIcon from "../../../../resources/images/BackIconWhite.svg";
-import { EventBus, GameEvent } from "../../../core/EventBus";
-import { CloseViewEvent } from "../../InputHandler";
-import { translateText } from "../../Utils";
-import { Layer } from "./Layer";
 import {
   CenterButtonElement,
   MenuElement,
   MenuElementParams,
   TooltipKey,
 } from "./RadialMenuElements";
+import { EventBus, GameEvent } from "../../../core/EventBus";
+import { CloseViewEvent } from "../../InputHandler";
+import { Layer } from "./Layer";
+import backIcon from "../../../../resources/images/BackIconWhite.svg";
+import { translateText } from "../../Utils";
 
 export class CloseRadialMenuEvent implements GameEvent {
   constructor() {}
@@ -55,20 +56,20 @@ export class RadialMenu implements Layer {
 
   private isTransitioning = false;
   private lastHideTime = 0;
-  private reopenCooldownMs = 300;
+  private readonly reopenCooldownMs = 300;
 
   private anchorX = 0;
   private anchorY = 0;
 
-  private menuGroups: Map<
+  private readonly menuGroups: Map<
     number,
     d3.Selection<SVGGElement, unknown, null, undefined>
   > = new Map();
-  private menuPaths: Map<
+  private readonly menuPaths: Map<
     string,
     d3.Selection<SVGPathElement, unknown, null, undefined>
   > = new Map();
-  private menuIcons: Map<
+  private readonly menuIcons: Map<
     string,
     d3.Selection<SVGImageElement, unknown, null, undefined>
   > = new Map();
@@ -77,14 +78,14 @@ export class RadialMenu implements Layer {
   private submenuHoverTimeout: number | null = null;
   private backButtonHoverTimeout: number | null = null;
   private navigationInProgress = false;
-  private originalCenterButtonIcon = "";
+  private readonly originalCenterButtonIcon: string = "";
 
   private params: MenuElementParams | null = null;
 
   constructor(
-    private eventBus: EventBus,
-    private rootMenu: MenuElement,
-    private centerButtonElement: CenterButtonElement,
+    private readonly eventBus: EventBus,
+    private readonly rootMenu: MenuElement,
+    private readonly centerButtonElement: CenterButtonElement,
     config: RadialMenuConfig = {},
   ) {
     this.config = {
@@ -149,7 +150,9 @@ export class RadialMenu implements Layer {
       .style("position", "absolute")
       .style("top", "50%")
       .style("left", "50%")
-      .style("transition", `top ${this.config.menuTransitionDuration}ms ease, left ${this.config.menuTransitionDuration}ms ease`)
+      .style("transition", `top ${
+        this.config.menuTransitionDuration}ms ease, left ${
+        this.config.menuTransitionDuration}ms ease`)
       .style("transform", "translate(-50%, -50%)")
       .style("pointer-events", "all")
       .on("click", (event) => this.hideRadialMenu());
@@ -325,7 +328,7 @@ export class RadialMenu implements Layer {
           return color;
         }
 
-        return d3.color(color)?.copy({ opacity: opacity })?.toString() ?? color;
+        return d3.color(color)?.copy({ opacity })?.toString() ?? color;
       })
       .attr("stroke", "#ffffff")
       .attr("stroke-width", "2")
@@ -435,7 +438,7 @@ export class RadialMenu implements Layer {
       const opacity = disabled ? 0.5 : 0.7;
       path.attr(
         "fill",
-        d3.color(color)?.copy({ opacity: opacity })?.toString() ?? color,
+        d3.color(color)?.copy({ opacity })?.toString() ?? color,
       );
     };
 
@@ -980,7 +983,7 @@ export class RadialMenu implements Layer {
         // Update path appearance
         path.attr(
           "fill",
-          d3.color(color)?.copy({ opacity: opacity })?.toString() ?? color,
+          d3.color(color)?.copy({ opacity })?.toString() ?? color,
         );
         path.style("opacity", disabled ? 0.5 : 1);
         path.style("cursor", disabled ? "not-allowed" : "pointer");
@@ -1066,7 +1069,7 @@ export class RadialMenu implements Layer {
       .style("left", `${clampedX}px`);
   }
 
-  private handleResize = () => {
+  private readonly handleResize = () => {
     if (this.isVisible) this.clampAndSetMenuPositionForLevel(this.currentLevel);
   };
 }

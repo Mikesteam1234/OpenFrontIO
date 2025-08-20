@@ -1,9 +1,9 @@
 // src/server/Security.ts
 import { NextFunction, Request, Response } from "express";
+import { fileURLToPath } from "url";
 import fs from "fs";
 import http from "http";
 import path from "path";
-import { fileURLToPath } from "url";
 
 export enum LimiterType {
   Get = "get",
@@ -94,7 +94,7 @@ async function getGatekeeper(): Promise<Gatekeeper> {
 }
 
 export class GatekeeperWrapper implements Gatekeeper {
-  constructor(private getGK: () => Promise<Gatekeeper>) {}
+  constructor(private readonly getGK: () => Promise<Gatekeeper>) {}
 
   httpHandler(
     limiterType: LimiterType,

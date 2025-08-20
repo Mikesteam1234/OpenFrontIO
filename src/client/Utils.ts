@@ -1,6 +1,6 @@
 import IntlMessageFormat from "intl-messageformat";
-import { MessageType } from "../core/game/Game";
 import { LangSelector } from "./LangSelector";
+import { MessageType } from "../core/game/Game";
 
 export function renderTroops(troops: number): string {
   return renderNumber(troops / 10);
@@ -115,7 +115,7 @@ export const translateText = (
   let message = langSelector.translations[key];
 
   if (!message && langSelector.defaultTranslations) {
-    const defaultTranslations = langSelector.defaultTranslations;
+    const { defaultTranslations } = langSelector;
     if (defaultTranslations && defaultTranslations[key]) {
       message = defaultTranslations[key];
     }
