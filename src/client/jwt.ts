@@ -255,6 +255,7 @@ export async function fetchPlayerById(
   try {
     const base = getApiBase();
     const token = getToken();
+    if (!token) return false;
     const url = `${base}/player/${encodeURIComponent(playerId)}`;
 
     const res = await fetch(url, {
