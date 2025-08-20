@@ -89,7 +89,7 @@ export class PlayerInfoModal extends LitElement {
 
   private getDisplayedStats(): PlayerStats | null {
     const leaf = this.getSelectedLeaf();
-    if (!leaf || !leaf.stats) return {} as PlayerStats;
+    if (!leaf || !leaf.stats) return null;
     return leaf.stats;
   }
 
