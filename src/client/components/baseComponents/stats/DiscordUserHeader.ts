@@ -1,4 +1,4 @@
-import { css, html, LitElement } from "lit";
+import { LitElement, css, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import type { DiscordUser } from "../../../../core/ApiSchemas";
 import { translateText } from "../../../Utils";
@@ -60,16 +60,14 @@ export class DiscordUserHeader extends LitElement {
   }
 
   render() {
-    const avatarUrl = this.avatarUrl;
-
     return html`
       <div class="wrap">
-        ${avatarUrl
+        ${this.avatarUrl
           ? html`
               <div class="avatarFrame">
                 <img
                   class="avatar"
-                  src="${avatarUrl}"
+                  src="${this.avatarUrl}"
                   alt="${translateText("player_modal.avatar_alt")}"
                 />
               </div>

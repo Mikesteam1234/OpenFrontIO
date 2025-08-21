@@ -1,7 +1,7 @@
 import { LitElement, css, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { PlayerGame } from "../../../../core/ApiSchemas";
 import { GameMode } from "../../../../core/game/Game";
+import { PlayerGame } from "../../../../core/ApiSchemas";
 import { translateText } from "../../../Utils";
 
 @customElement("game-list")
