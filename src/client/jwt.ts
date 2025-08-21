@@ -1,3 +1,4 @@
+import { PlayerIdResponse, PlayerIdResponseSchema } from "../core/ApiSchemas";
 import {
   RefreshResponseSchema,
   TokenPayload,
@@ -7,7 +8,6 @@ import {
 } from "../core/ApiSchemas";
 import { decodeJwt } from "jose";
 import { getServerConfigFromClient } from "../core/configuration/ConfigLoader";
-import { PlayerIdResponse, PlayerIdResponseSchema } from "../core/ApiSchemas";
 import { z } from "zod";
 
 function getAudience() {
@@ -287,4 +287,3 @@ export async function fetchPlayerById(
     return false;
   }
 }
- 

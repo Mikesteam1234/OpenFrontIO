@@ -1,29 +1,21 @@
-import { html, LitElement } from "lit";
-import { customElement, query, state } from "lit/decorators.js";
-import { translateText } from "../client/Utils";
+import "./components/baseComponents/stats/DiscordUserHeader";
+import "./components/baseComponents/stats/GameList";
+import "./components/baseComponents/stats/PlayerStatsTable";
+import "./components/baseComponents/stats/PlayerStatsTree";
+import { Difficulty, GameMode, GameType, isGameMode } from "../core/game/Game";
+import { LitElement, html } from "lit";
 import {
   PlayerGame,
-  PlayerStatsLeaf,
   PlayerStatsTree,
   UserMeResponse,
 } from "../core/ApiSchemas";
-import {
-  Difficulty,
-  GameMode,
-  GameType,
-  isDifficulty,
-  isGameMode,
-} from "../core/game/Game";
-import { PlayerStats } from "../core/StatsSchemas";
-import "./components/baseComponents/stats/DiscordUserHeader";
-import "./components/baseComponents/stats/GameList";
-import "./components/baseComponents/stats/PlayerStatsGrid";
-import "./components/baseComponents/stats/PlayerStatsTable";
+import { customElement, query, state } from "lit/decorators.js";
 import { fetchPlayerById } from "./jwt";
+import { translateText } from "../client/Utils";
 
 @customElement("player-info-modal")
 export class PlayerInfoModal extends LitElement {
-  @query("o-modal") private modalEl!: HTMLElement & {
+  @query("o-modal") private readonly modalEl!: HTMLElement & {
     open: () => void;
     close: () => void;
   };
@@ -35,14 +27,14 @@ export class PlayerInfoModal extends LitElement {
   @state() private selectedDifficulty: Difficulty = Difficulty.Medium;
   @state() private warningMessage: string | null = null;
 
-  private statsTree: PlayerStatsTree | undefined;
+  private readonly statsTree: PlayerStatsTree | undefined;
 
   private recentGames: PlayerGame[] = [];
 
   private viewGame(gameId: string): void {
     this.close();
     const path = location.pathname;
-    const search = location.search;
+    const { search } = location;
     const hash = `#join=${encodeURIComponent(gameId)}`;
     const newUrl = `${path}${search}${hash}`;
 
@@ -66,23 +58,6 @@ export class PlayerInfoModal extends LitElement {
 
   disconnectedCallback() {
     super.disconnectedCallback();
-  }
-
-  private getSelectedLeaf(): PlayerStatsLeaf | null {
-    const typeKey: GameType = this.visibility;
-    const typeNode = this.statsTree?.[typeKey];
-    if (!typeNode) return null;
-    const modeNode = typeNode[this.selectedMode];
-    if (!modeNode) return null;
-    const diffNode = modeNode[this.selectedDifficulty];
-    if (!diffNode) return null;
-    return diffNode;
-  }
-
-  private getDisplayedStats(): PlayerStats | null {
-    const leaf = this.getSelectedLeaf();
-    if (!leaf || !leaf.stats) return null;
-    return leaf.stats;
   }
 
   private setGameType(type: GameType) {
@@ -127,49 +102,7 @@ export class PlayerInfoModal extends LitElement {
     this.requestUpdate();
   }
 
-  private applyBackendStats(rawStats: PlayerStatsTree): void {
-    this.statsTree = rawStats;
-    const typeKey: GameType = this.visibility;
-    const typeNode = this.statsTree?.[typeKey] ?? {};
-
-    const availableModes = Object.keys(typeNode).filter(isGameMode);
-    if (availableModes.length > 0) {
-      this.selectedMode = availableModes.includes(this.selectedMode)
-        ? this.selectedMode
-        : availableModes[0];
-
-      const modeNode =
-        (
-          typeNode as Partial<
-            Record<GameMode, Partial<Record<Difficulty, PlayerStatsLeaf>>>
-          >
-        )[this.selectedMode] ?? {};
-      const availableDiffs = Object.keys(modeNode).filter(isDifficulty);
-      if (availableDiffs.length > 0) {
-        this.selectedDifficulty = availableDiffs.includes(
-          this.selectedDifficulty,
-        )
-          ? this.selectedDifficulty
-          : availableDiffs[0];
-      }
-    }
-
-    this.requestUpdate();
-  }
-
   render() {
-    const leaf = this.getSelectedLeaf();
-    const wins = Number(leaf?.wins ?? 0);
-    const losses = Number(leaf?.losses ?? 0);
-    const gamesPlayed = Number(leaf?.total ?? 0);
-    const wlr = losses === 0 ? wins : wins / losses;
-    const lastActive = this.recentGames.length
-      ? new Date(
-        Math.max(...this.recentGames.map((g) => Date.parse(g.start))),
-      ).toLocaleDateString()
-      : translateText("player_modal.na");
-    const playTimeText = translateText("player_modal.na");
-
     return html`
       <o-modal
         id="playerInfoModal"
@@ -274,32 +207,14 @@ export class PlayerInfoModal extends LitElement {
 
           <hr class="w-2/3 border-gray-600 my-2" />
 
-          <player-stats-grid
-            .titles=${[
-              translateText("player_modal.stats_wins"),
-              translateText("player_modal.stats_losses"),
-              translateText("player_modal.stats_wlr"),
-              translateText("player_modal.stats_games_played"),
-              translateText("player_modal.stats_play_time"),
-              translateText("player_modal.stats_last_active"),
-            ]}
-            .values=${[
-              wins,
-              losses,
-              wlr,
-              gamesPlayed,
-              playTimeText,
-              lastActive,
-            ]}
-          ></player-stats-grid>
-
-          <hr class="w-2/3 border-gray-600 my-2" />
-
-          <hr class="w-2/3 border-gray-600 my-2" />
-
-          <player-stats-table
-            .stats=${this.getDisplayedStats()}
-          ></player-stats-table>
+          <player-stats-tree-view
+            .props=${{
+              statsTree: this.statsTree,
+              visibility: this.visibility,
+              selectedMode: this.selectedMode,
+              selectedDifficulty: this.selectedDifficulty,
+            }}
+          ></player-stats-tree-view>
 
           <hr class="w-2/3 border-gray-600 my-2" />
 
@@ -346,8 +261,6 @@ export class PlayerInfoModal extends LitElement {
         this.requestUpdate();
         return;
       }
-
-      this.applyBackendStats(data.stats);
 
       this.recentGames = data.games;
 

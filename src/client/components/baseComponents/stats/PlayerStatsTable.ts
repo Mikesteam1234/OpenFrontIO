@@ -1,6 +1,6 @@
-import { css, html, LitElement } from "lit";
+import { LitElement, css, html } from "lit";
+import { PlayerStats, boatUnits, bombUnits, otherUnits } from "../../../../core/StatsSchemas";
 import { customElement, property } from "lit/decorators.js";
-import { boatUnits, bombUnits, otherUnits, PlayerStats } from "../../../../core/StatsSchemas";
 import { renderNumber, translateText } from "../../../Utils";
 
 @customElement("player-stats-table")
@@ -37,8 +37,6 @@ export class PlayerStatsTable extends LitElement {
   @property({ type: Object }) stats: PlayerStats;
 
   render() {
-    const stats = this.stats;
-
     return html`
       <div class="table-container">
         <div class="section-title">
@@ -58,10 +56,10 @@ export class PlayerStatsTable extends LitElement {
           </thead>
           <tbody>
             ${otherUnits.map((key) => {
-              const built = stats?.units?.[key]?.[0] ?? 0n;
-              const destroyed = stats?.units?.[key]?.[1] ?? 0n;
-              const captured = stats?.units?.[key]?.[2] ?? 0n;
-              const lost = stats?.units?.[key]?.[3] ?? 0n;
+              const built = this.stats?.units?.[key]?.[0] ?? 0n;
+              const destroyed = this.stats?.units?.[key]?.[1] ?? 0n;
+              const captured = this.stats?.units?.[key]?.[2] ?? 0n;
+              const lost = this.stats?.units?.[key]?.[3] ?? 0n;
               return html`
                 <tr>
                   <td>${translateText(`player_stats_table.unit.${key}`)}</td>
@@ -93,9 +91,9 @@ export class PlayerStatsTable extends LitElement {
           </thead>
           <tbody>
             ${boatUnits.map((key) => {
-              const sent = stats?.boats?.[key]?.[0] ?? 0n;
-              const arrived = stats?.boats?.[key]?.[1] ?? 0n;
-              const destroyed = stats?.boats?.[key]?.[3] ?? 0n;
+              const sent = this.stats?.boats?.[key]?.[0] ?? 0n;
+              const arrived = this.stats?.boats?.[key]?.[1] ?? 0n;
+              const destroyed = this.stats?.boats?.[key]?.[3] ?? 0n;
               return html`
                 <tr>
                   <td>${translateText(`player_stats_table.unit.${key}`)}</td>
@@ -132,9 +130,9 @@ export class PlayerStatsTable extends LitElement {
           </thead>
           <tbody>
             ${bombUnits.map((bomb) => {
-              const launched = stats?.bombs?.[bomb]?.[0] ?? 0n;
-              const landed = stats?.bombs?.[bomb]?.[1] ?? 0n;
-              const intercepted = stats?.bombs?.[bomb]?.[2] ?? 0n;
+              const launched = this.stats?.bombs?.[bomb]?.[0] ?? 0n;
+              const landed = this.stats?.bombs?.[bomb]?.[1] ?? 0n;
+              const intercepted = this.stats?.bombs?.[bomb]?.[2] ?? 0n;
               return html`
                 <tr>
                   <td>${translateText(`player_stats_table.unit.${bomb}`)}</td>
@@ -164,9 +162,9 @@ export class PlayerStatsTable extends LitElement {
           <tbody>
             <tr>
               <td>${translateText("player_stats_table.count")}</td>
-              <td>${renderNumber(stats?.attacks?.[0] ?? 0n)}</td>
-              <td>${renderNumber(stats?.attacks?.[1] ?? 0n)}</td>
-              <td>${renderNumber(stats?.attacks?.[2] ?? 0n)}</td>
+              <td>${renderNumber(this.stats?.attacks?.[0] ?? 0n)}</td>
+              <td>${renderNumber(this.stats?.attacks?.[1] ?? 0n)}</td>
+              <td>${renderNumber(this.stats?.attacks?.[2] ?? 0n)}</td>
             </tr>
           </tbody>
         </table>
@@ -183,10 +181,10 @@ export class PlayerStatsTable extends LitElement {
           <tbody>
             <tr>
               <td>${translateText("player_stats_table.count")}</td>
-              <td>${renderNumber(stats?.gold?.[0] ?? 0n)}</td>
-              <td>${renderNumber(stats?.gold?.[1] ?? 0n)}</td>
-              <td>${renderNumber(stats?.gold?.[2] ?? 0n)}</td>
-              <td>${renderNumber(stats?.gold?.[3] ?? 0n)}</td>
+              <td>${renderNumber(this.stats?.gold?.[0] ?? 0n)}</td>
+              <td>${renderNumber(this.stats?.gold?.[1] ?? 0n)}</td>
+              <td>${renderNumber(this.stats?.gold?.[2] ?? 0n)}</td>
+              <td>${renderNumber(this.stats?.gold?.[3] ?? 0n)}</td>
             </tr>
           </tbody>
         </table>
@@ -194,4 +192,3 @@ export class PlayerStatsTable extends LitElement {
     `;
   }
 }
-

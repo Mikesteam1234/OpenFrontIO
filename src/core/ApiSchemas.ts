@@ -1,7 +1,7 @@
 // This file contains schemas for api.openfront.io
-import { base64urlToUuid } from "./Base64";
 import { BigIntStringSchema, PlayerStatsSchema } from "./StatsSchemas";
 import { Difficulty, GameMapType, GameMode, GameType } from "./game/Game";
+import { base64urlToUuid } from "./Base64";
 import { z } from "zod";
 
 export const RefreshResponseSchema = z.object({

@@ -106,4 +106,3 @@ export const PlayerStatsSchema = z
   })
   .optional();
 export type PlayerStats = z.infer<typeof PlayerStatsSchema>;
-
