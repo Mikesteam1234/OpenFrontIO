@@ -11,7 +11,7 @@ import {
 } from "../core/ApiSchemas";
 import { customElement, query, state } from "lit/decorators.js";
 import { fetchPlayerById } from "./jwt";
-import { translateText } from "../client/Utils";
+import { translateText } from "./Utils";
 
 @customElement("player-info-modal")
 export class PlayerInfoModal extends LitElement {
