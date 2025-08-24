@@ -41,12 +41,6 @@ export class PlayerInfoModal extends LitElement {
     window.dispatchEvent(new HashChangeEvent("hashchange"));
   }
 
-  private formatPlayTime(seconds: number): string {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    return `${h}h ${m}m`;
-  }
-
   createRenderRoot() {
     return this;
   }
