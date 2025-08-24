@@ -240,6 +240,14 @@ export class PlayerInfoModal extends LitElement {
     const playerId = userMeResponse?.player?.publicId;
     if (playerId) {
       this.loadFromApi(playerId);
+    } else {
+      this.statsTree = null;
+      this.recentGames = [];
+      this.warningMessage = null;
+      this.loadError = null;
+      this.visibility = GameType.Public;
+      this.selectedMode = GameMode.FFA;
+      this.selectedDifficulty = Difficulty.Medium;
     }
     this.requestUpdate();
   }
