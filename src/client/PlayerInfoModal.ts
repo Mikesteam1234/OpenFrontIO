@@ -27,8 +27,7 @@ export class PlayerInfoModal extends LitElement {
   @state() private selectedDifficulty: Difficulty = Difficulty.Medium;
   @state() private warningMessage: string | null = null;
 
-  private readonly statsTree: PlayerStatsTree | undefined;
-
+  private statsTree: PlayerStatsTree | null = null;
   private recentGames: PlayerGame[] = [];
 
   private viewGame(gameId: string): void {
@@ -263,6 +262,7 @@ export class PlayerInfoModal extends LitElement {
       }
 
       this.recentGames = data.games;
+      this.statsTree = data.stats;
 
       this.requestUpdate();
     } catch (err) {
