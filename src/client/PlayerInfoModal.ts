@@ -45,14 +45,6 @@ export class PlayerInfoModal extends LitElement {
     return this;
   }
 
-  connectedCallback() {
-    super.connectedCallback();
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-  }
-
   private setGameType(type: GameType) {
     this.visibility = type;
     const typeKey: GameType = this.visibility;
