@@ -51,10 +51,8 @@ export class PlayerStatsTreeView extends LitElement {
 
   render() {
     const leaf = this.getSelectedLeaf();
-    const wins = Number(leaf?.wins ?? 0);
-    const losses = Number(leaf?.losses ?? 0);
-    const gamesPlayed = Number(leaf?.total ?? 0);
-    const wlr = losses === 0 ? wins : wins / losses;
+    if (leaf === null) return html``;
+    const wlr = leaf.losses === 0n ? leaf.wins : Number(leaf.wins) / Number(leaf.losses);
 
     return html`
       <player-stats-grid
