@@ -71,8 +71,8 @@ export class PlayerStatsTreeView extends LitElement {
           losses,
           wlr,
           gamesPlayed,
-          translateText("player_modal.na"),
-          translateText("player_modal.na"),
+          translateText("player_modal.not_applicable"),
+          translateText("player_modal.not_applicable"),
         ]}
       ></player-stats-grid>
 
