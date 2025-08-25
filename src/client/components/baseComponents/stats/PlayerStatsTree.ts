@@ -65,10 +65,10 @@ export class PlayerStatsTreeView extends LitElement {
           translateText("player_modal.stats_last_active"),
         ]}
         .values=${[
-          wins,
-          losses,
-          wlr,
-          gamesPlayed,
+          renderNumber(leaf.wins),
+          renderNumber(leaf.losses),
+          renderNumber(wlr),
+          renderNumber(leaf.total),
           translateText("player_modal.not_applicable"),
           translateText("player_modal.not_applicable"),
         ]}
