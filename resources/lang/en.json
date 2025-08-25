@@ -635,7 +635,7 @@
     "map": "Map",
     "difficulty": "Difficulty",
     "type": "Type",
-    "na": "N/A",
+    "not_applicable": "N/A",
     "flag_alt": "Flag",
     "avatar_alt": "Avatar",
     "no_data": "No data available for this selection",
