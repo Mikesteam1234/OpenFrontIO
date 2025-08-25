@@ -4,8 +4,8 @@ import { Difficulty, GameMode, GameType } from "../../../../core/game/Game";
 import { LitElement, html } from "lit";
 import { PlayerStatsLeaf, PlayerStatsTree } from "../../../../core/ApiSchemas";
 import { customElement, state } from "lit/decorators.js";
+import { renderNumber, translateText } from "../../../Utils";
 import { PlayerStats } from "../../../../core/StatsSchemas";
-import { translateText } from "../../../Utils";
 
 @customElement("player-stats-tree-view")
 export class PlayerStatsTreeView extends LitElement {
