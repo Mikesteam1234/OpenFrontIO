@@ -100,7 +100,7 @@ export abstract class DefaultServerConfig implements ServerConfig {
     return process.env.CF_CREDS_PATH ?? "";
   }
 
-  private publicKey: JWK;
+  private publicKey: JWK | undefined;
   abstract jwtAudience(): string;
   jwtIssuer(): string {
     const audience = this.jwtAudience();
@@ -532,6 +532,9 @@ export class DefaultConfig implements Config {
   }
   targetCooldown(): Tick {
     return 15 * 10;
+  }
+  allianceRequestDuration(): Tick {
+    return 20 * 10;
   }
   allianceRequestCooldown(): Tick {
     return 30 * 10;
