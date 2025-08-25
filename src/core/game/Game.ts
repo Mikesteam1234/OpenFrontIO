@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { AllPlayersStats, ClientID } from "../Schemas";
 import { GameMap, TileRef } from "./GameMap";
 import {
@@ -89,6 +90,7 @@ export enum GameMapType {
   FalklandIslands = "Falkland Islands",
   Baikal = "Baikal",
   Halkidiki = "Halkidiki",
+  NorthernHemisphere = "Northern Hemisphere",
   StraitOfGibraltar = "Strait of Gibraltar",
   Italia = "Italia",
   Yenisei = "Yenisei",
@@ -108,6 +110,7 @@ export const mapCategories: Record<string, GameMapType[]> = {
     GameMapType.Asia,
     GameMapType.Africa,
     GameMapType.Oceania,
+    GameMapType.NorthernHemisphere,
   ],
   regional: [
     GameMapType.BlackSea,
