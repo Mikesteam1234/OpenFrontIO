@@ -18,18 +18,8 @@ export class PlayerStatsTreeView extends LitElement {
     return this;
   }
 
-  set props(v: {
-    statsTree?: PlayerStatsTree;
-    visibility: GameType;
-    selectedMode: GameMode;
-    selectedDifficulty: Difficulty;
-    playTimeText?: string;
-    lastActive?: string;
-  }) {
+  set props(v: { statsTree?: PlayerStatsTree }) {
     this.statsTree = v.statsTree;
-    this.visibility = v.visibility;
-    this.selectedMode = v.selectedMode;
-    this.selectedDifficulty = v.selectedDifficulty;
     this.requestUpdate();
   }
 
@@ -49,12 +39,99 @@ export class PlayerStatsTreeView extends LitElement {
     return leaf.stats;
   }
 
+  private setGameType(t: GameType) {
+    if (this.visibility !== t) {
+      this.visibility = t;
+      this.requestUpdate();
+    }
+  }
+
+  private setMode(m: GameMode) {
+    if (this.selectedMode !== m) {
+      this.selectedMode = m;
+      this.requestUpdate();
+    }
+  }
+
+  private setDifficulty(d: Difficulty) {
+    if (this.selectedDifficulty !== d) {
+      this.selectedDifficulty = d;
+      this.requestUpdate();
+    }
+  }
+
   render() {
     const leaf = this.getSelectedLeaf();
     if (leaf === null) return html``;
-    const wlr = leaf.losses === 0n ? leaf.wins : Number(leaf.wins) / Number(leaf.losses);
+    const wlr =
+      leaf.losses === 0n ? leaf.wins : Number(leaf.wins) / Number(leaf.losses);
 
     return html`
+      <!-- Visibility toggle under names -->
+      <div class="flex gap-2 mt-2">
+        <button
+          class="text-xs px-2 py-0.5 rounded border ${this.visibility ===
+          GameType.Public
+            ? "border-white/60 text-white"
+            : "border-white/20 text-gray-300"}"
+          @click=${() => this.setGameType(GameType.Public)}
+        >
+          ${translateText("player_modal.public")}
+        </button>
+        <button
+          class="text-xs px-2 py-0.5 rounded border ${this.visibility ===
+          GameType.Private
+            ? "border-white/60 text-white"
+            : "border-white/20 text-gray-300"}"
+          @click=${() => this.setGameType(GameType.Private)}
+        >
+          ${translateText("player_modal.private")}
+        </button>
+      </div>
+      <!-- Mode selector -->
+      <div class="flex gap-2 mt-2">
+        ${([GameMode.FFA, GameMode.Team] as const).map(
+          (m) => html`
+            <button
+              class="text-xs px-2 py-0.5 rounded border ${this.selectedMode ===
+              m
+                ? "border-white/60 text-white"
+                : "border-white/20 text-gray-300"}"
+              @click=${() => this.setMode(m)}
+              title=${translateText("player_modal.mode")}
+            >
+              ${m === GameMode.FFA
+                ? translateText("player_modal.mode_ffa")
+                : translateText("player_modal.mode_team")}
+            </button>
+          `,
+        )}
+      </div>
+      <!-- Difficulty selector -->
+      <div class="flex gap-2 mt-2">
+        ${(
+          [
+            Difficulty.Easy,
+            Difficulty.Medium,
+            Difficulty.Hard,
+            Difficulty.Impossible,
+          ] as const
+        ).map(
+          (d) => html`
+            <button
+              class="text-xs px-2 py-0.5 rounded border ${this
+                .selectedDifficulty === d
+                ? "border-white/60 text-white"
+                : "border-white/20 text-gray-300"}"
+              @click=${() => this.setDifficulty(d)}
+              title=${translateText("player_modal.difficulty")}
+            >
+              ${d}
+            </button>
+          `,
+        )}
+      </div>
+      <hr class="w-2/3 border-gray-600 my-2" />
       <player-stats-grid
         .titles=${[
           translateText("player_modal.stats_wins"),
