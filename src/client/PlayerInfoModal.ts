@@ -203,15 +203,11 @@ export class PlayerInfoModal extends LitElement {
 
           <hr class="w-2/3 border-gray-600 my-2" />
 
-          <div class="mt-4 w-full max-w-md">
-            <div class="text-sm text-gray-400 font-semibold mb-1">
-              🎮 ${translateText("player_modal.recent_games")}
-            </div>
-            <game-list
-              .games=${this.recentGames}
-              .onViewGame=${(id: string) => this.viewGame(id)}
-            ></game-list>
-          </div>
+          <game-list
+            .games=${this.recentGames}
+            .onViewGame=${(id: string) => this.viewGame(id)}
+          ></game-list>
+
         </div>
       </o-modal>
     `;

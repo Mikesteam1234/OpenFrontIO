@@ -57,7 +57,11 @@ export class GameList extends LitElement {
   }
 
   render() {
-    return html` <div class="flex flex-col gap-2">
+    return html` 
+              <div class="mt-4 w-full max-w-md">
+            <div class="text-sm text-gray-400 font-semibold mb-1">
+              🎮 ${translateText("player_modal.recent_games")}
+            <div class="flex flex-col gap-2">
       ${this.games.map(
         (game) => html`
           <div class="card">
@@ -132,6 +136,8 @@ export class GameList extends LitElement {
           </div>
         `,
       )}
-    </div>`;
+    </div></div>
+
+          </div>`;
   }
 }
