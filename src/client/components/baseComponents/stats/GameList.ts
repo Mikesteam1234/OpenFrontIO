@@ -57,87 +57,86 @@ export class GameList extends LitElement {
   }
 
   render() {
-    return html` 
-              <div class="mt-4 w-full max-w-md">
-            <div class="text-sm text-gray-400 font-semibold mb-1">
-              🎮 ${translateText("player_modal.recent_games")}
-            <div class="flex flex-col gap-2">
-      ${this.games.map(
-        (game) => html`
-          <div class="card">
-            <div class="row">
-              <div>
-                <div class="title">
-                  ${translateText("player_modal.game_id")}: ${game.gameId}
+    return html` <div class="mt-4 w-full max-w-md">
+      <div class="text-sm text-gray-400 font-semibold mb-1">
+        🎮 ${translateText("player_modal.recent_games")}
+        <div class="flex flex-col gap-2">
+          ${this.games.map(
+            (game) => html`
+              <div class="card">
+                <div class="row">
+                  <div>
+                    <div class="title">
+                      ${translateText("player_modal.game_id")}: ${game.gameId}
+                    </div>
+                    <div class="subtle">
+                      ${translateText("player_modal.mode")}:
+                      ${game.mode === GameMode.FFA
+                        ? translateText("player_modal.mode_ffa")
+                        : html`${translateText("player_modal.mode_team")}`}
+                    </div>
+                  </div>
+                  <div class="flex gap-2">
+                    <button
+                      class="btn"
+                      @click=${() => this.onViewGame?.(game.gameId)}
+                    >
+                      ${translateText("player_modal.view")}
+                    </button>
+                    <button
+                      class="btn secondary"
+                      @click=${() => this.toggle(game.gameId)}
+                    >
+                      ${translateText("player_modal.details")}
+                    </button>
+                  </div>
                 </div>
-                <div class="subtle">
-                  ${translateText("player_modal.mode")}:
-                  ${game.mode === GameMode.FFA
-                    ? translateText("player_modal.mode_ffa")
-                    : html`${translateText("player_modal.mode_team")}`}
+                <div
+                  class="details"
+                  style="max-height:${this.expandedGameId === game.gameId
+                    ? "200px"
+                    : "0"}; ${this.expandedGameId === game.gameId
+                    ? ""
+                    : "padding-top:0; padding-bottom:0;"}"
+                >
+                  <div>
+                    <span class="title" style="font-size:0.75rem;"
+                      >${translateText("player_modal.started")}:</span
+                    >
+                    ${new Date(game.start).toLocaleString()}
+                  </div>
+                  <div>
+                    <span class="title" style="font-size:0.75rem;"
+                      >${translateText("player_modal.mode")}:</span
+                    >
+                    ${game.mode === GameMode.FFA
+                      ? translateText("player_modal.mode_ffa")
+                      : translateText("player_modal.mode_team")}
+                  </div>
+                  <div>
+                    <span class="title" style="font-size:0.75rem;"
+                      >${translateText("player_modal.map")}:</span
+                    >
+                    ${game.map}
+                  </div>
+                  <div>
+                    <span class="title" style="font-size:0.75rem;"
+                      >${translateText("player_modal.difficulty")}:</span
+                    >
+                    ${game.difficulty}
+                  </div>
+                  <div>
+                    <span class="title" style="font-size:0.75rem;"
+                      >${translateText("player_modal.type")}:</span
+                    >
+                    ${game.type}
+                  </div>
                 </div>
               </div>
-              <div class="flex gap-2">
-                <button
-                  class="btn"
-                  @click=${() => this.onViewGame?.(game.gameId)}
-                >
-                  ${translateText("player_modal.view")}
-                </button>
-                <button
-                  class="btn secondary"
-                  @click=${() => this.toggle(game.gameId)}
-                >
-                  ${translateText("player_modal.details")}
-                </button>
-              </div>
-            </div>
-            <div
-              class="details"
-              style="max-height:${this.expandedGameId === game.gameId
-                ? "200px"
-                : "0"}; ${this.expandedGameId === game.gameId
-                ? ""
-                : "padding-top:0; padding-bottom:0;"}"
-            >
-              <div>
-                <span class="title" style="font-size:0.75rem;"
-                  >${translateText("player_modal.started")}:</span
-                >
-                ${new Date(game.start).toLocaleString()}
-              </div>
-              <div>
-                <span class="title" style="font-size:0.75rem;"
-                  >${translateText("player_modal.mode")}:</span
-                >
-                ${game.mode === GameMode.FFA
-                  ? translateText("player_modal.mode_ffa")
-                  : translateText("player_modal.mode_team")}
-              </div>
-              <div>
-                <span class="title" style="font-size:0.75rem;"
-                  >${translateText("player_modal.map")}:</span
-                >
-                ${game.map}
-              </div>
-              <div>
-                <span class="title" style="font-size:0.75rem;"
-                  >${translateText("player_modal.difficulty")}:</span
-                >
-                ${game.difficulty}
-              </div>
-              <div>
-                <span class="title" style="font-size:0.75rem;"
-                  >${translateText("player_modal.type")}:</span
-                >
-                ${game.type}
-              </div>
-            </div>
-          </div>
-        `,
-      )}
-    </div></div>
-
-          </div>`;
+            `,
+          )}
+        </div>
+      </div>
+    </div>`;
   }
 }
