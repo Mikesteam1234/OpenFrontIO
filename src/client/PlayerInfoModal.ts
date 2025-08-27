@@ -21,10 +21,7 @@ export class PlayerInfoModal extends LitElement {
   };
 
   @state() private userMeResponse: UserMeResponse | null = null;
-  @state() private visibility: GameType = GameType.Public;
   @state() private loadError: string | null = null;
-  @state() private selectedMode: GameMode = GameMode.FFA;
-  @state() private selectedDifficulty: Difficulty = Difficulty.Medium;
   @state() private warningMessage: string | null = null;
 
   private statsTree: PlayerStatsTree | null = null;
@@ -83,12 +80,7 @@ export class PlayerInfoModal extends LitElement {
           ></discord-user-header>
 
           <player-stats-tree-view
-            .props=${{
-              statsTree: this.statsTree,
-              visibility: this.visibility,
-              selectedMode: this.selectedMode,
-              selectedDifficulty: this.selectedDifficulty,
-            }}
+            .statsTree=${this.statsTree}
           ></player-stats-tree-view>
 
           <hr class="w-2/3 border-gray-600 my-2" />
@@ -123,9 +115,6 @@ export class PlayerInfoModal extends LitElement {
       this.recentGames = [];
       this.warningMessage = null;
       this.loadError = null;
-      this.visibility = GameType.Public;
-      this.selectedMode = GameMode.FFA;
-      this.selectedDifficulty = Difficulty.Medium;
     }
     this.requestUpdate();
   }

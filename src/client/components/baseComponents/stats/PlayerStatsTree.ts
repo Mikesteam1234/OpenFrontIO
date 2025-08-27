@@ -3,24 +3,19 @@ import "./PlayerStatsTable";
 import { Difficulty, GameMode, GameType } from "../../../../core/game/Game";
 import { LitElement, html } from "lit";
 import { PlayerStatsLeaf, PlayerStatsTree } from "../../../../core/ApiSchemas";
-import { customElement, state } from "lit/decorators.js";
+import { customElement, property, state } from "lit/decorators.js";
 import { renderNumber, translateText } from "../../../Utils";
 import { PlayerStats } from "../../../../core/StatsSchemas";
 
 @customElement("player-stats-tree-view")
 export class PlayerStatsTreeView extends LitElement {
-  @state() statsTree?: PlayerStatsTree;
+  @property({ type: Object }) statsTree?: PlayerStatsTree;
   @state() visibility: GameType = GameType.Public;
   @state() selectedMode: GameMode = GameMode.FFA;
   @state() selectedDifficulty: Difficulty = Difficulty.Medium;
 
   createRenderRoot() {
     return this;
-  }
-
-  set props(v: { statsTree?: PlayerStatsTree }) {
-    this.statsTree = v.statsTree;
-    this.requestUpdate();
   }
 
   private getSelectedLeaf(): PlayerStatsLeaf | null {
